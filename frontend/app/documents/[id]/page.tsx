@@ -24,48 +24,113 @@ export default function DocumentDetailPage() {
     return <ErrorState message={document.error} />;
   }
   if (!document.data) {
-    return <EmptyState title="Document not found" message="The backend did not return this document." />;
+    return (
+      <EmptyState
+        title="Document not found"
+        message="The backend did not return this document."
+        showSeedCommands={false}
+      />
+    );
   }
 
   return (
     <>
       <PageHeader
         title={document.data.title}
-        description="Document detail, cleaned text preview, and chunk-level retrieval evidence."
+        description="Document detail, cleaned text preview, and chunk-level retrieval evidence used in RAG evaluation."
       />
+
+      {/* Metric summary */}
       <div className="grid gap-4 md:grid-cols-4">
-        <MetricCard label="Source" value={document.data.source_type} />
-        <MetricCard label="Document type" value={document.data.document_type} />
-        <MetricCard label="Chunks" value={chunks.data?.length ?? 0} />
-        <MetricCard label="Created" value={formatDate(document.data.created_at)} />
+        <MetricCard
+          label="Source type"
+          value={document.data.source_type}
+          accent="info"
+        />
+        <MetricCard
+          label="Document type"
+          value={document.data.document_type}
+          accent="info"
+        />
+        <MetricCard
+          label="Chunks"
+          value={chunks.data?.length ?? "—"}
+        />
+        <MetricCard
+          label="Created"
+          value={formatDate(document.data.created_at)}
+        />
       </div>
+
+      {/* Cleaned text */}
       <section className="mt-5 rounded-lg border border-line bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap gap-2">
-          <StatusBadge value={document.data.source_type} />
-          <StatusBadge value={document.data.document_type} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-ink">
+            Cleaned text preview
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <StatusBadge value={document.data.source_type} />
+            <StatusBadge value={document.data.document_type} />
+          </div>
         </div>
-        <h2 className="mt-4 text-lg font-semibold">Cleaned text preview</h2>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-graphite">
-          {truncate(document.data.cleaned_text, 1200)}
-        </p>
+        <div className="mt-4 rounded-md bg-surface p-4">
+          <p className="whitespace-pre-wrap text-sm leading-7 text-graphite">
+            {truncate(document.data.cleaned_text, 1400)}
+          </p>
+        </div>
       </section>
+
+      {/* Chunks */}
       <section className="mt-5">
-        <h2 className="mb-3 text-lg font-semibold">Chunks</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-ink">
+            Chunks
+            {chunks.data?.length ? (
+              <span className="ml-2 rounded-full bg-surface px-2 py-0.5 text-xs font-medium text-graphite border border-line">
+                {chunks.data.length}
+              </span>
+            ) : null}
+          </h2>
+          <p className="text-xs text-graphite">
+            Indexed for vector retrieval
+          </p>
+        </div>
         {chunks.error ? <ErrorState message={chunks.error} /> : null}
         {chunks.data?.length === 0 ? (
-          <EmptyState title="No chunks found" message="Chunk this document from the API or seed script." />
+          <EmptyState
+            title="No chunks found"
+            message="Chunk this document from the API or seed script."
+          />
         ) : null}
         <div className="grid gap-3">
           {chunks.data?.map((chunk) => (
-            <article className="rounded-lg border border-line bg-white p-4 shadow-sm" key={chunk.id}>
+            <article
+              className="rounded-lg border border-line bg-white p-4 shadow-sm"
+              key={chunk.id}
+            >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold">Chunk {chunk.chunk_index}</p>
-                <StatusBadge value={chunk.embedding_model ? "embedded" : "not embedded"} />
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md bg-surface px-2 py-0.5 text-xs font-semibold text-graphite border border-line">
+                    #{chunk.chunk_index}
+                  </span>
+                  <p className="text-sm font-semibold text-ink">
+                    Chunk {chunk.chunk_index}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-graphite">
+                    ~{chunk.token_count} tokens
+                  </span>
+                  <StatusBadge
+                    value={chunk.embedding_model ? "embedded" : "not embedded"}
+                  />
+                </div>
               </div>
-              <p className="mt-2 text-xs text-graphite">Approx tokens: {chunk.token_count}</p>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-graphite">
-                {chunk.chunk_text}
-              </p>
+              <div className="mt-3 rounded-md bg-surface p-3">
+                <p className="whitespace-pre-wrap text-sm leading-7 text-graphite">
+                  {chunk.chunk_text}
+                </p>
+              </div>
             </article>
           ))}
         </div>
