@@ -27,6 +27,8 @@ cd backend
 - The CLI uses the configured `DATABASE_URL`.
 - Run the sample commands from `backend/` so the relative paths resolve as shown.
 - Sample configs use deterministic local providers and synthetic data.
+- `seed-docs` skips existing sample documents. `seed-qa` skips import when the
+  target dataset already has examples, which avoids duplicate demo QA rows.
 - Exported reports include limitations and are not validated benchmark results.
 - Do not use the CLI to write real patient data, private student data, secrets,
   or real provider keys into the repository.

@@ -11,6 +11,7 @@ from app.db.session import SessionLocal
 from app.models.dataset import Dataset
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
+from app.models.qa_example import QAExample
 from app.schemas.datasets import DatasetCreate
 from app.schemas.documents import DocumentCreate
 from app.services.chunking_service import chunking_service
@@ -146,6 +147,17 @@ def seed_qa(
                     metadata={"sample_file": str(path), "synthetic": True},
                 ),
             )
+        existing_example = (
+            db.execute(select(QAExample).where(QAExample.dataset_id == dataset.id))
+            .scalars()
+            .first()
+        )
+        if existing_example is not None:
+            typer.echo(
+                f"Dataset {dataset.id} already has QA examples; skipping import. "
+                "Use a fresh database or delete the dataset to reseed."
+            )
+            return
         result = qa_import_service.import_jsonl(db, dataset.id, path.read_text(encoding="utf-8"))
     typer.echo(
         f"Seeded dataset {dataset.id}: {result.imported_examples} examples, "

@@ -27,3 +27,7 @@ cd backend
 
 Generated local report artifacts should normally remain uncommitted unless they
 are clearly synthetic examples requested for documentation.
+
+For Batch 6 validation, generate reports locally with the `sample_deterministic`
+filenames from `docs/demo-checklist.md`, inspect them, then leave them untracked
+unless intentionally committing a clearly labeled synthetic artifact.

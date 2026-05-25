@@ -36,3 +36,7 @@ validated healthcare data.
 
 For end-to-end demo validation, follow `docs/demo-checklist.md` after starting
 Postgres, applying migrations, and running the CLI seed commands.
+
+The demo seed workflow is intended for local reproducibility. `seed-docs` skips
+already seeded documents, and `seed-qa` skips an existing populated sample
+dataset to avoid duplicate QA examples.

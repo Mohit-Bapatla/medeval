@@ -205,6 +205,11 @@ Then start the backend and frontend, open `http://localhost:3000`, and follow
 `docs/demo-checklist.md`. If Docker is unavailable, Postgres/pgvector runtime
 validation cannot be completed locally and should not be claimed.
 
+If Docker is installed but `docker compose up -d db` cannot connect to the
+Docker API, start Docker Desktop and retry. If port `5432` is already in use,
+set a local ignored `POSTGRES_PORT` override in `.env` or stop the conflicting
+local database.
+
 ## Repository Structure
 
 ```text
