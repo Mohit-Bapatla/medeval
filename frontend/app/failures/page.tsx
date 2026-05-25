@@ -84,7 +84,14 @@ export default function FailuresPage() {
                         {truncate(failure.question, 120)}
                       </Link>
                     </td>
-                    <td className="px-4 py-3"><StatusBadge value={failure.failure_type} /></td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        <StatusBadge value={failure.primary_failure_type || failure.failure_type} />
+                        {failure.failure_reason ? (
+                          <span className="text-xs text-graphite">{truncate(failure.failure_reason, 90)}</span>
+                        ) : null}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">{failure.expected_answerability}</td>
                     <td className="px-4 py-3 text-graphite">{truncate(failure.answer_text, 140)}</td>
                   </tr>

@@ -56,6 +56,33 @@ paid model APIs.
 These endpoints compute dashboard, trace, failure, and report views from existing
 experiment data. They do not persist report artifacts or fabricate metrics.
 
+## Batch 4 CLI And Evaluation Polish
+
+Batch 4 adds deterministic claim extraction and citation-support heuristics,
+richer failure taxonomy metadata, retrieval-vs-generation failure labels, human
+review records, YAML experiment configs, Typer CLI commands, and
+Markdown/JSON/CSV report exports.
+
+CLI examples:
+
+```powershell
+.\.venv\Scripts\medeval status
+.\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
+.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
+```
+
+New API endpoints:
+
+- `POST /api/v1/experiments/from-config`
+- `GET /api/v1/experiments/{experiment_id}/results.csv`
+- `POST /api/v1/responses/{response_id}/human-review`
+- `GET /api/v1/responses/{response_id}/human-reviews`
+
+Claim support and failure labels are deterministic heuristics stored in
+`evaluation_results.metadata_json`. They are not validated benchmark metrics or
+clinical review.
+
 ## Limitations
 
 - No answer generation, QA benchmark import, experiment runner, or metric scoring
@@ -65,3 +92,4 @@ experiment data. They do not persist report artifacts or fabricate metrics.
   not validated semantic benchmark performance.
 - The deterministic answer provider and MVP evaluator are local/dev/test
   scaffolding, not benchmark-grade or clinically validated evaluation.
+- Human review records are manually created records; no fake reviews are seeded.

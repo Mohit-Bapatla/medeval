@@ -10,6 +10,7 @@ from app.models.model_response import ModelResponse
 from app.models.qa_example import QAExample
 from app.schemas.experiments import ExperimentAggregateResults, ExperimentCreate
 from app.schemas.rag import RagAnswerRequest
+from app.services.config_service import ExperimentConfig, config_service
 from app.services.evaluation_service import evaluation_service
 from app.services.rag_service import rag_service
 
@@ -34,6 +35,9 @@ class ExperimentService:
         db.commit()
         db.refresh(experiment)
         return experiment
+
+    def create_experiment_from_config(self, db: Session, config: ExperimentConfig) -> Experiment:
+        return self.create_experiment(db, config_service.to_experiment_create(db, config))
 
     def list_experiments(self, db: Session) -> list[Experiment]:
         return db.execute(select(Experiment).order_by(Experiment.created_at.desc())).scalars().all()

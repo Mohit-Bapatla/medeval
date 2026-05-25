@@ -33,7 +33,13 @@
 
 ## Batch 4: Evaluation And Reports
 
-- Richer evaluator implementations
-- Provider integrations without committed secrets
-- Report export formats beyond Markdown/JSON preview
-- Dashboard comparison workflows
+- Deterministic claim-level citation support heuristics
+- Retrieval-vs-generation failure separation and richer taxonomy metadata
+- Human review records for model responses
+- YAML experiment configs and Typer CLI workflow
+- Markdown, JSON, and CSV report exports with limitations
+- Scoped frontend filtering, trace, review, and report download polish
+
+Future batches can add governed provider integrations, comparison workflows, and
+stronger evaluation methods without committing secrets or claiming validation
+from synthetic samples.

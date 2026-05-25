@@ -26,5 +26,10 @@ The app expects the backend API at `http://localhost:8000/api/v1` unless
 - `/reports`: report candidates
 - `/experiments/[id]/report`: computed Markdown/JSON report preview
 
+Batch 4 adds scoped filters for dataset and experiment tables, claim-support
+metadata in the trace viewer, local human review records, and Markdown/JSON/CSV
+report download actions. The displayed metrics come from the connected backend
+database and are not hardcoded demo results.
+
 The frontend does not include auth or real provider keys. Empty states explain
 how to seed synthetic sample data instead of hardcoding demo metrics.

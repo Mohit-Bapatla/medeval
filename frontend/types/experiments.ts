@@ -44,6 +44,14 @@ export type ExperimentResponseRow = {
   groundedness_score?: number | null;
   hallucination_flag?: boolean | null;
   failure_type?: string | null;
+  primary_failure_type?: string | null;
+  secondary_failure_types: string[];
+  failure_reason?: string | null;
+  retrieval_failure?: boolean | null;
+  generation_failure?: boolean | null;
+  claim_count?: number | null;
+  claim_support_rate?: number | null;
+  unsupported_claim_rate?: number | null;
   created_at: string;
 };
 

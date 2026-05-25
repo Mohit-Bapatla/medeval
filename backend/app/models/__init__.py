@@ -6,6 +6,7 @@ from app.models.document_chunk import DocumentChunk
 from app.models.evaluation_result import EvaluationResult
 from app.models.evidence_link import EvidenceLink
 from app.models.experiment import Experiment
+from app.models.human_review import HumanReview
 from app.models.model_response import ModelResponse, ResponseRetrievedChunk
 from app.models.prompt_template import PromptTemplate
 from app.models.qa_example import QAExample
@@ -18,6 +19,7 @@ __all__ = [
     "EvaluationResult",
     "EvidenceLink",
     "Experiment",
+    "HumanReview",
     "ModelResponse",
     "PromptTemplate",
     "QAExample",

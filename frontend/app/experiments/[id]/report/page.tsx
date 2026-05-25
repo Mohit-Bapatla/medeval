@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { PageHeader } from "@/components/ui/page-header";
+import { API_BASE_URL } from "@/lib/api";
 import { formatDate, formatMetric } from "@/lib/format";
 import { useApi } from "@/lib/use-api";
 import type { ExperimentReport } from "@/types/experiments";
@@ -28,6 +29,26 @@ export default function ExperimentReportPage() {
     anchor.download = `${report.data.experiment.name.replaceAll(" ", "_")}_report.md`;
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  function downloadJson() {
+    if (!report.data) {
+      return;
+    }
+    const blob = new Blob([JSON.stringify(report.data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${report.data.experiment.name.replaceAll(" ", "_")}_report.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadCsv() {
+    if (!params.id) {
+      return;
+    }
+    window.location.href = `${API_BASE_URL}/experiments/${params.id}/results.csv`;
   }
 
   async function copyMarkdown() {
@@ -57,6 +78,12 @@ export default function ExperimentReportPage() {
           <div className="flex gap-2">
             <button className="rounded-md border border-line px-3 py-2 text-sm" onClick={() => void copyMarkdown()} type="button">
               Copy Markdown
+            </button>
+            <button className="rounded-md border border-line px-3 py-2 text-sm" onClick={downloadJson} type="button">
+              Download JSON
+            </button>
+            <button className="rounded-md border border-line px-3 py-2 text-sm" onClick={downloadCsv} type="button">
+              Download CSV
             </button>
             <button className="rounded-md bg-clinical px-3 py-2 text-sm font-medium text-white" onClick={downloadMarkdown} type="button">
               Download .md

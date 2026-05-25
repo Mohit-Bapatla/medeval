@@ -48,3 +48,35 @@ Batch 2 stores deterministic heuristic evaluation results:
 If a metric denominator is unavailable, the metric is stored as `null` rather
 than forcing a fake zero. Overall score is a transparent weighted MVP score over
 available components and is not benchmark-grade.
+
+## Batch 4 Claim-Level Heuristics
+
+Batch 4 adds deterministic claim-level citation support metadata:
+
+- Claim extraction splits answer text into sentence-like factual claims.
+- Citation support checks cited retrieved chunks with token-overlap heuristics.
+- Support status is one of `supported`, `partially_supported`, `unsupported`, or
+  `uncited`.
+- Metadata includes claim count, support rate, citation coverage, and unsupported
+  claim rate.
+
+These metrics are designed for debugging traces and evaluator development. They
+are deterministic and reproducible, but they are not clinical validation,
+medical review, or benchmark-grade scoring.
+
+## Batch 4 Failure Taxonomy
+
+Batch 4 separates retrieval bottlenecks from generation/evaluation failures and
+stores richer metadata:
+
+- `primary_failure_type`
+- `secondary_failure_types`
+- `failure_reason`
+- `evidence_summary`
+- `retrieval_failure`
+- `generation_failure`
+
+Failure labels include `retrieval_miss`,
+`retrieval_success_generation_failure`, `unsupported_claim`, `uncited_claim`,
+`failed_to_refuse`, `over_refusal`, `bad_citation`, `missing_citation`,
+`wrong_answer`, `partial_answer`, and related deterministic labels.

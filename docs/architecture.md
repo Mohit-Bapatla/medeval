@@ -59,3 +59,15 @@ validation, or report validated benchmark results.
   provider metadata, and raw structured output.
 - Report previews are computed Markdown/JSON responses and are not persisted
   artifacts in Batch 3.
+
+## Batch 4 Evaluation And Workflow Layer
+
+- Claim extraction and citation support checks live in `backend/app/evals/` as
+  deterministic heuristics.
+- Evaluation results keep claim-support metrics and failure analysis details in
+  `metadata_json` so the schema remains flexible.
+- Human review records are stored separately because they are authored records,
+  not derived evaluator output.
+- YAML configs and the CLI provide reproducible local runs over synthetic data.
+- Report exports are computed from stored experiments and always include
+  limitations and non-validation disclaimers.

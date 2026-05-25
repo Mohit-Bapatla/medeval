@@ -155,6 +155,35 @@ python scripts/run_sample_experiment.py
 Visible metrics come from the connected local backend database. Empty states are
 shown instead of fake results when the database has not been seeded.
 
+## Batch 4 CLI, Reports, And Evaluator Polish
+
+Batch 4 adds deterministic claim-level citation support checks, richer failure
+taxonomy metadata, retrieval-vs-generation failure separation, human review
+records, YAML experiment configs, CLI commands, and Markdown/JSON/CSV report
+exports. These features remain local development scaffolding and do not create
+validated benchmark or healthcare claims.
+
+Example deterministic workflow:
+
+```powershell
+cd backend
+.\.venv\Scripts\medeval status
+.\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
+.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
+```
+
+Reports can be exported after a local experiment:
+
+```powershell
+.\.venv\Scripts\medeval export-report --experiment-id <experiment-id> --format markdown --out ..\reports\example_report.md
+.\.venv\Scripts\medeval export-results --experiment-id <experiment-id> --format csv --out ..\reports\results.csv
+```
+
+Claim-level support uses deterministic token overlap against cited retrieved
+chunks. It is useful for debugging traces, but it is not medically validated or
+benchmark-grade.
+
 ## Repository Structure
 
 ```text
@@ -173,8 +202,11 @@ docker-compose.yml    Local PostgreSQL + pgvector
 
 Batch 0 created the project foundation. Batch 1 added document storage,
 chunking, embeddings, retrieval search, and synthetic sample documents. Batch 2
-adds QA benchmark workflow foundations, deterministic local RAG traces, MVP
-evaluation results, and experiment aggregation.
+added QA benchmark workflow foundations, deterministic local RAG traces, MVP
+evaluation results, and experiment aggregation. Batch 3 added the frontend
+dashboard, trace viewer, failure analysis, and computed reports. Batch 4 adds
+CLI/config workflows, claim-level heuristic checks, human review records, and
+stronger report exports.
 
 Later batches will improve evaluator quality, provider integrations, trace
 review, reports, dashboard workflows, and CLI commands.

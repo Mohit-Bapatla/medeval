@@ -34,3 +34,17 @@ not a benchmark result.
 ```powershell
 python scripts/run_sample_experiment.py
 ```
+
+## Batch 4 CLI
+
+The backend package also installs a Typer CLI for the same local workflows:
+
+```powershell
+cd backend
+.\.venv\Scripts\medeval status
+.\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
+.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
+```
+
+The CLI uses deterministic local providers and synthetic sample data only.

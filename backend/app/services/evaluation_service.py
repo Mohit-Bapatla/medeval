@@ -4,14 +4,17 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.evals.citation_support import citation_support_checker
+from app.evals.claim_extraction import claim_extractor
+from app.evals.failure_taxonomy import failure_taxonomy
 from app.models.evaluation_result import EvaluationResult
 from app.models.evidence_link import EvidenceLink
 from app.models.model_response import ModelResponse, ResponseRetrievedChunk
 
 
 class EvaluationService:
-    evaluator_name = "deterministic-mvp-evaluator"
-    evaluator_version = "0.1.0"
+    evaluator_name = "deterministic-heuristic-evaluator"
+    evaluator_version = "0.2.0"
 
     def evaluate(self, db: Session, model_response_id: uuid.UUID) -> EvaluationResult:
         response = db.get(ModelResponse, model_response_id)
@@ -44,25 +47,41 @@ class EvaluationService:
             if link.evidence_role in {"required", "acceptable"}
         }
         retrieved = {str(trace.chunk_id) for trace in retrieved_trace}
+        retrieved_text = {str(trace.chunk_id): trace.chunk.chunk_text for trace in retrieved_trace}
         cited = set(response.cited_chunk_ids_json or [])
         answerability = response.qa_example.answerability
 
+        claims = claim_extractor.extract(response.answer_text)
+        claim_results = citation_support_checker.check_claims(
+            claims,
+            list(response.cited_chunk_ids_json or []),
+            retrieved_text,
+        )
+        claim_support = citation_support_checker.summarize(claim_results)
         retrieval_recall = self._ratio(len(required.intersection(retrieved)), len(required))
         retrieval_precision = self._ratio(len(relevant.intersection(retrieved)), len(retrieved))
         citation_recall = self._ratio(len(required.intersection(cited)), len(required))
         citation_precision = self._ratio(len(relevant.intersection(cited)), len(cited))
         refusal_score = self._refusal_score(answerability, response)
         correctness = self._correctness_score(response, refusal_score)
-        groundedness = self._groundedness_score(cited, retrieved, response, answerability)
-        hallucination = self._hallucination_flag(response, cited, retrieved, answerability)
-        failure_type = self._failure_type(
-            answerability,
+        groundedness = self._groundedness_score(
+            cited,
+            retrieved,
             response,
-            retrieval_recall,
-            citation_recall,
-            citation_precision,
-            correctness,
-            hallucination,
+            answerability,
+            claim_support,
+        )
+        hallucination = self._hallucination_flag(response, cited, retrieved, answerability)
+        classification = failure_taxonomy.classify(
+            expected_answerability=answerability,
+            refused=self._is_refusal_text(response.answer_text),
+            retrieval_recall=retrieval_recall,
+            citation_recall=citation_recall,
+            citation_precision=citation_precision,
+            correctness=correctness,
+            hallucination=hallucination,
+            claim_support=claim_support,
+            answer_text=response.answer_text,
         )
         overall = self._overall_score(
             correctness,
@@ -84,13 +103,26 @@ class EvaluationService:
             refusal_score=refusal_score,
             hallucination_flag=hallucination,
             overall_score=overall,
-            failure_type=failure_type,
+            failure_type=classification.primary_failure_type,
             evaluator_name=self.evaluator_name,
             evaluator_version=self.evaluator_version,
             judge_explanation=(
-                "Deterministic MVP heuristic; null metrics indicate unavailable denominators."
+                "Deterministic heuristic evaluator; claim support is token-overlap based and "
+                "not benchmark-grade or clinically validated. Null metrics indicate unavailable "
+                "denominators."
             ),
-            metadata_json={"scoring": "heuristic_mvp_not_validated"},
+            metadata_json={
+                "scoring": "heuristic_not_validated",
+                "claim_support": claim_support,
+                "failure_analysis": {
+                    "primary_failure_type": classification.primary_failure_type,
+                    "secondary_failure_types": classification.secondary_failure_types,
+                    "failure_reason": classification.failure_reason,
+                    "evidence_summary": classification.evidence_summary,
+                    "retrieval_failure": classification.retrieval_failure,
+                    "generation_failure": classification.generation_failure,
+                },
+            },
         )
         db.add(result)
         db.commit()
@@ -135,9 +167,13 @@ class EvaluationService:
         retrieved: set[str],
         response: ModelResponse,
         expected_answerability: str,
+        claim_support: dict[str, object],
     ) -> float:
         if expected_answerability == "unanswerable" and self._is_refusal_text(response.answer_text):
             return 1.0
+        claim_support_rate = claim_support.get("claim_support_rate")
+        if isinstance(claim_support_rate, float):
+            return claim_support_rate
         if not cited:
             return 0.0
         return 1.0 if cited.issubset(retrieved) else 0.25

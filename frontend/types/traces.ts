@@ -41,6 +41,50 @@ export type EvaluationResult = {
   created_at: string;
 };
 
+export type ClaimSupportClaim = {
+  claim_index: number;
+  claim_text: string;
+  cited_chunk_ids: string[];
+  support_status: "supported" | "partially_supported" | "unsupported" | "uncited" | string;
+  token_overlap?: number | null;
+  cited_chunks_retrieved: boolean;
+};
+
+export type ClaimSupportMetadata = {
+  method?: string;
+  claim_count?: number;
+  supported_claim_count?: number;
+  unsupported_claim_count?: number;
+  uncited_claim_count?: number;
+  claim_support_rate?: number | null;
+  citation_coverage?: number | null;
+  unsupported_claim_rate?: number | null;
+  claims?: ClaimSupportClaim[];
+};
+
+export type FailureAnalysisMetadata = {
+  primary_failure_type?: string;
+  secondary_failure_types?: string[];
+  failure_reason?: string;
+  evidence_summary?: string;
+  retrieval_failure?: boolean;
+  generation_failure?: boolean;
+};
+
+export type HumanReview = {
+  id: string;
+  model_response_id: string;
+  reviewer_name?: string | null;
+  reviewer_role?: string | null;
+  correctness_label?: string | null;
+  groundedness_label?: string | null;
+  refusal_label?: string | null;
+  notes?: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
 export type TraceChunk = {
   chunk_id: string;
   document_id: string;
@@ -65,4 +109,5 @@ export type ResponseTrace = {
     version: string;
     template_type: string;
   } | null;
+  human_reviews: HumanReview[];
 };

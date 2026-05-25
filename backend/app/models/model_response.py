@@ -53,6 +53,12 @@ class ModelResponse(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    human_reviews = relationship(
+        "HumanReview",
+        back_populates="model_response",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
 class ResponseRetrievedChunk(Base):

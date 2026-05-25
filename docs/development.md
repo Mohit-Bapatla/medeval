@@ -96,3 +96,20 @@ npm.cmd run dev
 
 Use `/traces/{responseId}` to inspect retrieved chunks, cited chunks, model
 answer, gold answer, evaluator scores, failure type, and raw output.
+
+## Batch 4 CLI Workflow
+
+After installing the backend package, the `medeval` CLI can run deterministic
+local workflows without external services:
+
+```powershell
+cd backend
+.\.venv\Scripts\python -m pip install -e ".[dev]"
+.\.venv\Scripts\medeval status
+.\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
+.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
+```
+
+CLI report exports include limitations and should not be treated as validated
+benchmark results.

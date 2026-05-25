@@ -1,0 +1,15 @@
+name: Synthetic deterministic baseline v0.1
+dataset_name: Synthetic Healthcare Opportunity QA
+description: Local deterministic sample run for MedEval development; not a validated benchmark.
+model_provider: deterministic_local
+model_name: deterministic-extractive-answer-v1
+embedding_model: deterministic-hash-embedding-384
+retrieval_strategy: vector_similarity
+top_k: 5
+temperature: 0.0
+evaluator_version: "0.2.0"
+notes: Synthetic sample config for local development only. No external model APIs are used.
+metadata:
+  synthetic: true
+  not_benchmark_result: true
+  sample_config_version: "0.1"

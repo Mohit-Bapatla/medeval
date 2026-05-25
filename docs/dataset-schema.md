@@ -66,6 +66,33 @@ Sample JSONL may reference evidence by raw `chunk_id` or by
 These traces support reproducibility and evaluator debugging; they are not
 benchmark results by themselves.
 
+## Human Reviews
+
+`human_reviews` store optional local review labels for model responses:
+
+- reviewer name and role, both optional
+- correctness label: `correct`, `partially_correct`, `incorrect`, or `unsure`
+- groundedness label: `grounded`, `partially_grounded`, `unsupported`, or
+  `unsure`
+- refusal label: `correct_refusal`, `failed_refusal`, `over_refusal`, or
+  `not_applicable`
+- notes and metadata
+
+No fake human reviews are seeded. A review record does not imply clinician
+review unless the reviewer role explicitly says so.
+
+## Evaluation Metadata
+
+Batch 4 keeps claim-level support and richer failure analysis in
+`evaluation_results.metadata_json`:
+
+- `claim_support`: deterministic claim counts, support rates, citation coverage,
+  and per-claim support statuses
+- `failure_analysis`: primary/secondary failure labels, failure reason, evidence
+  summary, and retrieval-vs-generation flags
+
+These fields are heuristic evaluator outputs, not validated benchmark results.
+
 ## Data Policy
 
 Use fake/demo/sample data in this repository. Do not commit real patient data,

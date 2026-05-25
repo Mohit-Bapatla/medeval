@@ -21,6 +21,11 @@ class ExperimentCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class ExperimentFromConfigCreate(BaseModel):
+    yaml_text: str | None = None
+    config_path: str | None = None
+
+
 class ExperimentRead(ExperimentCreate):
     id: uuid.UUID
     status: ExperimentStatus

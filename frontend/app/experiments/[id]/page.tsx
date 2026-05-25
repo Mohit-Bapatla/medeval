@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useMemo, useState } from "react";
 
 import { FailureDistributionChart } from "@/components/charts/failure-distribution-chart";
 import { MetricBarChart } from "@/components/charts/metric-bar-chart";
@@ -21,6 +22,9 @@ export default function ExperimentDetailPage() {
   const experiment = useApi<Experiment>(id ? `/experiments/${id}` : null);
   const results = useApi<ExperimentResults>(id ? `/experiments/${id}/results` : null);
   const responses = useApi<ExperimentResponseRow[]>(id ? `/experiments/${id}/responses` : null);
+  const [failureFilter, setFailureFilter] = useState("all");
+  const [answerabilityFilter, setAnswerabilityFilter] = useState("all");
+  const [hallucinationFilter, setHallucinationFilter] = useState("all");
 
   if (experiment.loading || results.loading || responses.loading) {
     return <LoadingState label="Loading experiment..." />;
@@ -40,6 +44,23 @@ export default function ExperimentDetailPage() {
     { name: "Ret R", value: results.data?.avg_retrieval_recall ?? 0 },
     { name: "Refusal", value: results.data?.refusal_accuracy ?? 0 },
   ];
+  const filteredResponses = useMemo(() => {
+    return (responses.data ?? []).filter((response) => {
+      const failure = response.failure_type || "none";
+      const hallucination = response.hallucination_flag ? "flagged" : "not_flagged";
+      return (
+        (failureFilter === "all" || failure === failureFilter) &&
+        (answerabilityFilter === "all" || response.expected_answerability === answerabilityFilter) &&
+        (hallucinationFilter === "all" || hallucination === hallucinationFilter)
+      );
+    });
+  }, [answerabilityFilter, failureFilter, hallucinationFilter, responses.data]);
+  const failureOptions = Array.from(
+    new Set((responses.data ?? []).map((response) => response.failure_type || "none")),
+  ).sort();
+  const answerabilityOptions = Array.from(
+    new Set((responses.data ?? []).map((response) => response.expected_answerability)),
+  ).sort();
 
   return (
     <>
@@ -76,12 +97,34 @@ export default function ExperimentDetailPage() {
       <section className="mt-5 overflow-hidden rounded-lg border border-line bg-white shadow-sm">
         <div className="border-b border-line p-4">
           <h2 className="text-lg font-semibold">Model responses</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <select className="rounded-md border border-line bg-white px-3 py-2 text-sm" onChange={(event) => setFailureFilter(event.target.value)} value={failureFilter}>
+              <option value="all">All failures</option>
+              {failureOptions.map((failure) => (
+                <option key={failure} value={failure}>{failure}</option>
+              ))}
+            </select>
+            <select className="rounded-md border border-line bg-white px-3 py-2 text-sm" onChange={(event) => setAnswerabilityFilter(event.target.value)} value={answerabilityFilter}>
+              <option value="all">All answerability</option>
+              {answerabilityOptions.map((answerability) => (
+                <option key={answerability} value={answerability}>{answerability}</option>
+              ))}
+            </select>
+            <select className="rounded-md border border-line bg-white px-3 py-2 text-sm" onChange={(event) => setHallucinationFilter(event.target.value)} value={hallucinationFilter}>
+              <option value="all">All hallucination states</option>
+              <option value="flagged">Hallucination flagged</option>
+              <option value="not_flagged">No hallucination flag</option>
+            </select>
+          </div>
         </div>
         {responses.error ? <ErrorState message={responses.error} /> : null}
         {responses.data?.length === 0 ? (
           <EmptyState title="No responses" message="Run this experiment to generate response traces." />
         ) : null}
-        {responses.data?.length ? (
+        {responses.data?.length && filteredResponses.length === 0 ? (
+          <EmptyState title="No matching responses" message="Adjust the response filters to see more traces." />
+        ) : null}
+        {filteredResponses.length ? (
           <table className="w-full border-collapse text-left text-sm">
             <thead className="bg-surface text-xs uppercase text-graphite">
               <tr>
@@ -93,7 +136,7 @@ export default function ExperimentDetailPage() {
               </tr>
             </thead>
             <tbody>
-              {responses.data.map((response) => (
+              {filteredResponses.map((response) => (
                 <tr className="border-t border-line align-top" key={response.response_id}>
                   <td className="px-4 py-3 font-medium">
                     <Link className="text-clinical hover:underline" href={`/traces/${response.response_id}`}>
@@ -103,7 +146,14 @@ export default function ExperimentDetailPage() {
                   <td className="px-4 py-3"><StatusBadge value={response.expected_answerability} /></td>
                   <td className="px-4 py-3">{formatMetric(response.correctness_score)}</td>
                   <td className="px-4 py-3">{formatMetric(response.groundedness_score)}</td>
-                  <td className="px-4 py-3"><StatusBadge value={response.failure_type || "none"} /></td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1">
+                      <StatusBadge value={response.failure_type || "none"} />
+                      {response.failure_reason ? (
+                        <span className="text-xs text-graphite">{truncate(response.failure_reason, 90)}</span>
+                      ) : null}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
