@@ -65,3 +65,13 @@ The seed script can load, chunk, and embed them when a database is available:
 ```powershell
 python scripts/seed_sample_documents.py
 ```
+
+Then seed synthetic QA and run a local deterministic experiment:
+
+```powershell
+python scripts/seed_sample_qa.py
+python scripts/run_sample_experiment.py
+```
+
+The experiment output is a local smoke summary for development. It is not a
+validated benchmark result.

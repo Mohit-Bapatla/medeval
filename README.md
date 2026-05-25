@@ -91,8 +91,33 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/retrieval/searc
 ```
 
 Batch 1 uses `deterministic-hash-embedding-384`, a local fixed-dimension
-embedding provider that requires no API keys. It is intended for development,
-tests, and demos, not benchmark claims.
+embedding provider that requires no API keys. Batch 2 adds synthetic QA datasets,
+evidence links, deterministic local RAG answers, model response traces, MVP
+heuristic evaluators, and a synchronous small-dataset experiment runner.
+
+The deterministic answer provider is local development scaffolding. It is not a
+real LLM, not benchmark-grade, and not clinical validation.
+
+## Batch 2 QA And Experiment Workflow
+
+After sample documents are seeded, chunked, and embedded, import synthetic QA and
+run a local deterministic experiment:
+
+```powershell
+python scripts/seed_sample_documents.py
+python scripts/seed_sample_qa.py
+python scripts/run_sample_experiment.py
+```
+
+Useful API entry points:
+
+- `POST /api/v1/datasets`
+- `POST /api/v1/datasets/{dataset_id}/import-jsonl`
+- `POST /api/v1/qa-examples/{qa_example_id}/evidence-links`
+- `POST /api/v1/rag/answer`
+- `POST /api/v1/responses/{model_response_id}/evaluate`
+- `POST /api/v1/experiments/{experiment_id}/run`
+- `GET /api/v1/experiments/{experiment_id}/results`
 
 ## Repository Structure
 
@@ -110,13 +135,13 @@ docker-compose.yml    Local PostgreSQL + pgvector
 
 ## Roadmap
 
-Batch 0 created the project foundation. Batch 1 adds document storage, text
-cleaning, deterministic chunking, local deterministic embeddings, pgvector-ready
-chunk storage, retrieval search, retrieval logs, and synthetic sample documents.
+Batch 0 created the project foundation. Batch 1 added document storage,
+chunking, embeddings, retrieval search, and synthetic sample documents. Batch 2
+adds QA benchmark workflow foundations, deterministic local RAG traces, MVP
+evaluation results, and experiment aggregation.
 
-Later batches will add QA benchmark import, answer generation, evaluation
-metrics, experiment runners, trace review, reports, dashboard workflows, and CLI
-commands.
+Later batches will improve evaluator quality, provider integrations, trace
+review, reports, dashboard workflows, and CLI commands.
 
 ## Safety And Privacy
 

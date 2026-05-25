@@ -1,8 +1,8 @@
 # Architecture
 
-MedEval is planned as a modular healthcare RAG evaluation platform. Batch 1 adds
-the first real backend data and retrieval foundation while keeping answer
-generation and evaluation metrics out of scope.
+MedEval is planned as a modular healthcare RAG evaluation platform. Batch 2 adds
+the first QA benchmark, deterministic RAG trace, evaluation, and experiment
+foundation while keeping paid providers and advanced judges out of scope.
 
 ## Planned Layers
 
@@ -32,5 +32,19 @@ generation and evaluation metrics out of scope.
 
 ## Current Boundaries
 
-The current implementation does not generate answers, score QA benchmarks,
-perform clinical validation, or report benchmark results.
+The current implementation uses deterministic local answer generation and MVP
+heuristic evaluators. It does not call real provider APIs, perform clinical
+validation, or report validated benchmark results.
+
+## Batch 2 Evaluation Flow
+
+- Datasets contain QA examples with answerability, category, difficulty, risk,
+  gold answers, and optional expected behavior.
+- Evidence links connect QA examples to required, acceptable, or supporting
+  chunks.
+- RAG traces store retrieved chunks, cited chunks, provider output, latency,
+  token estimates, and estimated cost.
+- Evaluation results store deterministic heuristic retrieval, citation, refusal,
+  correctness, groundedness, hallucination, failure type, and overall scores.
+- Experiments synchronously run a small dataset through RAG and evaluation, then
+  expose aggregate metrics.

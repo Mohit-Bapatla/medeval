@@ -39,6 +39,33 @@ reviewable QA examples for evaluation datasets.
 - `risk_level`: expected risk level if answered incorrectly
 - `reviewed_by_human`: whether a qualified reviewer has checked the example
 
+Batch 2 implements these fields in `qa_examples`, with enum-like string
+validation at the API layer.
+
+## Evidence Links
+
+`evidence_links` connect QA examples to expected chunks:
+
+- `required`: needed to answer the question
+- `acceptable`: can support a valid answer or citation
+- `supporting`: useful context, not required for MVP recall
+
+Sample JSONL may reference evidence by raw `chunk_id` or by
+`document_file + chunk_index` after sample documents are seeded.
+
+## Model Response Trace Fields
+
+`model_responses` store deterministic local RAG output:
+
+- answer text and answerability
+- cited and retrieved chunk IDs
+- raw structured provider output
+- local latency, token estimates, and estimated cost
+- provider/model names and prompt template reference
+
+These traces support reproducibility and evaluator debugging; they are not
+benchmark results by themselves.
+
 ## Data Policy
 
 Use fake/demo/sample data in this repository. Do not commit real patient data,

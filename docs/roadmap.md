@@ -18,9 +18,11 @@
 
 ## Batch 2: Dataset And Document Pipeline
 
-- Dataset import validation
-- QA benchmark dataset schema and import
-- Safe sample fixtures
+- QA benchmark dataset schema and JSONL import/export
+- Evidence links from QA examples to chunks
+- Deterministic local RAG answer traces
+- MVP evaluation result schema and synchronous experiment runner
+- Synthetic sample QA fixtures
 
 ## Batch 3: Retrieval And Generation
 

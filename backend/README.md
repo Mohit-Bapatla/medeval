@@ -3,7 +3,8 @@
 FastAPI service for MedEval. The backend includes health/status endpoints,
 document ingestion, conservative text cleaning, deterministic chunking,
 deterministic local embeddings, pgvector-ready vector storage, retrieval search,
-retrieval logs, Alembic migrations, and tests.
+retrieval logs, synthetic QA datasets, deterministic RAG traces, MVP evaluation
+results, synchronous experiment runs, Alembic migrations, and tests.
 
 ## Local Development
 
@@ -32,10 +33,24 @@ The default embedding provider is `deterministic-hash-embedding-384`. It is
 stable, normalized, local, and keyless so tests and local retrieval do not need
 paid model APIs.
 
+## Batch 2 Workflow
+
+1. Create a dataset with `POST /api/v1/datasets`.
+2. Add QA examples with `POST /api/v1/datasets/{dataset_id}/examples` or import
+   JSONL with `POST /api/v1/datasets/{dataset_id}/import-jsonl`.
+3. Link expected evidence chunks with
+   `POST /api/v1/qa-examples/{qa_example_id}/evidence-links`.
+4. Generate a deterministic local RAG answer with `POST /api/v1/rag/answer`.
+5. Evaluate a response with `POST /api/v1/responses/{model_response_id}/evaluate`.
+6. Create and run a small synchronous experiment with `POST /api/v1/experiments`
+   and `POST /api/v1/experiments/{experiment_id}/run`.
+
 ## Limitations
 
 - No answer generation, QA benchmark import, experiment runner, or metric scoring
-  is implemented in Batch 1.
+  using paid providers or LLM judges is implemented in Batch 2.
 - PDF upload is text extraction only; OCR and layout recovery are out of scope.
 - The deterministic embedding provider is for development and reproducibility,
   not validated semantic benchmark performance.
+- The deterministic answer provider and MVP evaluator are local/dev/test
+  scaffolding, not benchmark-grade or clinically validated evaluation.
