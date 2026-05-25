@@ -26,15 +26,14 @@
 
 ## Batch 3: Retrieval And Generation
 
-- Embedding provider abstraction
-- Vector storage and retrieval
-- RAG answer generation with citation capture
-- Provider interfaces without committed secrets
+- Frontend dashboard
+- Documents, datasets, experiments, trace viewer, failures, and reports pages
+- Backend summary, trace, failure, response listing, and report endpoints
+- Recharts visualizations for local experiment metrics
 
 ## Batch 4: Evaluation And Reports
 
-- Metric implementations
-- Experiment runner
-- Failure classification
-- Report export
-- Dashboard views for comparing runs
+- Richer evaluator implementations
+- Provider integrations without committed secrets
+- Report export formats beyond Markdown/JSON preview
+- Dashboard comparison workflows

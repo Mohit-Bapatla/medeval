@@ -62,7 +62,7 @@ export function ApiStatusPanel() {
         <div className="mt-4 grid gap-3 text-sm text-graphite">
           <div>
             <span className="font-semibold text-ink">{status.name}</span>
-            <span> · {status.version}</span>
+            <span> - {status.version}</span>
           </div>
           <div>{status.purpose}</div>
           <div className="flex flex-wrap gap-2">

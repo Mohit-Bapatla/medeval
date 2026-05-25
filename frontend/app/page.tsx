@@ -1,79 +1,116 @@
+"use client";
+
+import Link from "next/link";
+
 import { ApiStatusPanel } from "@/components/api-status";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { MetricCard } from "@/components/ui/metric-card";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { formatDate, formatMetric, formatNumber } from "@/lib/format";
+import { useApi } from "@/lib/use-api";
+import type { DashboardSummary } from "@/types/dashboard";
 
-const plannedMetrics = [
-  "correctness",
-  "groundedness",
-  "hallucination rate",
-  "citation accuracy",
-  "refusal accuracy",
-  "retrieval recall",
-  "latency",
-  "cost",
-];
-
-const workflow = [
-  "Import evaluation datasets",
-  "Run retrieval and answer-generation experiments",
-  "Store traces, citations, metrics, and failures",
-  "Compare reports across model and retrieval settings",
+const navCards = [
+  { href: "/documents", title: "Documents", text: "Inspect source text, chunks, and embedding status." },
+  { href: "/datasets", title: "Datasets", text: "Review QA examples, answerability, and evidence links." },
+  { href: "/experiments", title: "Experiments", text: "Compare runs, metrics, and response traces." },
+  { href: "/failures", title: "Failures", text: "Find hallucinations, bad citations, and retrieval misses." },
+  { href: "/reports", title: "Reports", text: "Preview computed Markdown and JSON experiment reports." },
 ];
 
 export default function Home() {
+  const { data, error, loading } = useApi<DashboardSummary>("/dashboard/summary");
+
   return (
-    <main className="min-h-screen">
-      <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase text-clinical">MedEval</p>
-            <h1 className="mt-3 text-4xl font-semibold text-ink md:text-5xl">
-              Healthcare RAG evaluation and reliability platform
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-graphite">
-              Open-source tooling for evaluating healthcare RAG and LLM systems across
-              correctness, grounding, citation behavior, refusals, retrieval quality,
-              latency, and cost.
-            </p>
-          </div>
-          <div className="rounded-lg border border-line bg-surface p-4 text-sm text-graphite">
-            <p className="font-semibold text-ink">Development foundation</p>
-            <p className="mt-2 max-w-xs">
-              This early build contains the app structure, API health checks, and local
-              development wiring. It does not contain validated benchmark results.
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-lg border border-line bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-semibold text-ink">Evaluation focus</h2>
-          <p className="mt-3 text-sm leading-6 text-graphite">
-            MedEval is not a generic chatbot. The project is organized around reproducible
-            experiments, traces, metrics, dataset schemas, reports, and reliability review.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {plannedMetrics.map((metric) => (
-              <div key={metric} className="rounded-md border border-line bg-surface px-3 py-2">
-                <span className="text-sm font-medium text-ink">{metric}</span>
+    <>
+      <PageHeader
+        title="MedEval Dashboard"
+        description="Open-source healthcare RAG evaluation workflows for traces, metrics, failures, and reproducible reports."
+      />
+      <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
+        <section className="grid gap-4">
+          {loading ? <LoadingState label="Loading dashboard summary..." /> : null}
+          {error ? <ErrorState message={error} /> : null}
+          {data ? (
+            <>
+              <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
+                <p className="text-sm font-semibold text-ink">Development status</p>
+                <p className="mt-2 text-sm leading-6 text-graphite">{data.status_note}</p>
               </div>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <MetricCard label="Documents" value={formatNumber(data.counts.documents)} />
+                <MetricCard label="Chunks" value={formatNumber(data.counts.chunks)} />
+                <MetricCard label="Datasets" value={formatNumber(data.counts.datasets)} />
+                <MetricCard label="QA examples" value={formatNumber(data.counts.qa_examples)} />
+                <MetricCard label="Experiments" value={formatNumber(data.counts.experiments)} />
+                <MetricCard label="Responses" value={formatNumber(data.counts.model_responses)} />
+                <MetricCard label="Evaluations" value={formatNumber(data.counts.evaluation_results)} />
+                <MetricCard
+                  label="Latest hallucination rate"
+                  value={formatMetric(data.latest_experiment?.results.hallucination_rate)}
+                />
+              </div>
+              {data.latest_experiment ? (
+                <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase text-graphite">Latest experiment</p>
+                      <h2 className="mt-1 text-xl font-semibold">{data.latest_experiment.name}</h2>
+                      <p className="mt-2 text-sm text-graphite">
+                        Created {formatDate(data.latest_experiment.created_at)}
+                      </p>
+                    </div>
+                    <StatusBadge value={data.latest_experiment.status} />
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <MetricCard
+                      label="Examples"
+                      value={formatNumber(data.latest_experiment.results.example_count)}
+                    />
+                    <MetricCard
+                      label="Correctness"
+                      value={formatMetric(data.latest_experiment.results.avg_correctness)}
+                    />
+                    <MetricCard
+                      label="Groundedness"
+                      value={formatMetric(data.latest_experiment.results.avg_groundedness)}
+                    />
+                  </div>
+                  <Link
+                    className="mt-4 inline-flex rounded-md bg-clinical px-3 py-2 text-sm font-medium text-white"
+                    href={`/experiments/${data.latest_experiment.id}`}
+                  >
+                    Open experiment
+                  </Link>
+                </div>
+              ) : (
+                <EmptyState
+                  title="No experiments yet"
+                  message="Seed the synthetic documents and QA examples, then run a sample experiment to populate real local metrics."
+                />
+              )}
+            </>
+          ) : null}
+        </section>
+        <aside className="grid gap-4">
+          <ApiStatusPanel />
+          <div className="grid gap-3">
+            {navCards.map((card) => (
+              <Link
+                className="rounded-lg border border-line bg-white p-4 shadow-sm hover:border-clinical"
+                href={card.href}
+                key={card.href}
+              >
+                <p className="font-semibold text-ink">{card.title}</p>
+                <p className="mt-2 text-sm leading-6 text-graphite">{card.text}</p>
+              </Link>
             ))}
           </div>
-        </section>
-
-        <ApiStatusPanel />
-
-        <section className="rounded-lg border border-line bg-white p-5 shadow-sm lg:col-span-2">
-          <h2 className="text-xl font-semibold text-ink">Planned workflow</h2>
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
-            {workflow.map((item, index) => (
-              <div key={item} className="rounded-md border border-line bg-surface p-4">
-                <p className="text-sm font-semibold text-clinical">Step {index + 1}</p>
-                <p className="mt-2 text-sm leading-6 text-graphite">{item}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        </aside>
       </div>
-    </main>
+    </>
   );
 }

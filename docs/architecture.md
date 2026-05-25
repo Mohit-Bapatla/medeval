@@ -48,3 +48,14 @@ validation, or report validated benchmark results.
   correctness, groundedness, hallucination, failure type, and overall scores.
 - Experiments synchronously run a small dataset through RAG and evaluation, then
   expose aggregate metrics.
+
+## Batch 3 Dashboard Layer
+
+- The frontend reads typed API responses from the local FastAPI backend.
+- Overview counts, experiment metrics, failure analysis, traces, and reports are
+  computed from stored backend data.
+- The trace viewer is the primary inspection surface: it shows question, gold
+  answer, model answer, retrieved chunks, cited chunks, scores, failure type,
+  provider metadata, and raw structured output.
+- Report previews are computed Markdown/JSON responses and are not persisted
+  artifacts in Batch 3.

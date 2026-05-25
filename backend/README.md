@@ -45,6 +45,17 @@ paid model APIs.
 6. Create and run a small synchronous experiment with `POST /api/v1/experiments`
    and `POST /api/v1/experiments/{experiment_id}/run`.
 
+## Batch 3 Dashboard Endpoints
+
+- `GET /api/v1/dashboard/summary`
+- `GET /api/v1/experiments/{experiment_id}/responses`
+- `GET /api/v1/experiments/{experiment_id}/failures`
+- `GET /api/v1/experiments/{experiment_id}/report`
+- `GET /api/v1/responses/{model_response_id}/trace`
+
+These endpoints compute dashboard, trace, failure, and report views from existing
+experiment data. They do not persist report artifacts or fabricate metrics.
+
 ## Limitations
 
 - No answer generation, QA benchmark import, experiment runner, or metric scoring

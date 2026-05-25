@@ -29,6 +29,10 @@ npm run typecheck
 npm run dev
 ```
 
+The frontend defaults to `http://localhost:8000/api/v1`. Set
+`NEXT_PUBLIC_API_BASE_URL` only when pointing at another local backend; do not
+commit a real `.env` file.
+
 ## Database
 
 ```powershell
@@ -75,3 +79,20 @@ python scripts/run_sample_experiment.py
 
 The experiment output is a local smoke summary for development. It is not a
 validated benchmark result.
+
+## Dashboard
+
+Start the backend and frontend, then open `http://localhost:3000`:
+
+```powershell
+cd backend
+.\.venv\Scripts\python -m uvicorn app.main:app --reload --port 8000
+```
+
+```powershell
+cd frontend
+npm.cmd run dev
+```
+
+Use `/traces/{responseId}` to inspect retrieved chunks, cited chunks, model
+answer, gold answer, evaluator scores, failure type, and raw output.

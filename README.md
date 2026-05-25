@@ -119,6 +119,42 @@ Useful API entry points:
 - `POST /api/v1/experiments/{experiment_id}/run`
 - `GET /api/v1/experiments/{experiment_id}/results`
 
+## Batch 3 Dashboard Workflow
+
+Batch 3 adds a frontend dashboard for exploring the local evaluation database:
+
+- overview counts and latest experiment status
+- document and chunk inspection
+- dataset and QA example review
+- experiment metrics and response tables
+- response trace viewer with retrieved/cited chunks and evaluator scores
+- failure analysis
+- computed Markdown/JSON experiment reports
+
+Run the backend and frontend locally:
+
+```powershell
+cd backend
+.\.venv\Scripts\python -m uvicorn app.main:app --reload --port 8000
+```
+
+```powershell
+cd frontend
+npm.cmd run dev
+```
+
+Open `http://localhost:3000`. If no data appears, seed the synthetic sample data
+and run a deterministic local experiment:
+
+```powershell
+python scripts/seed_sample_documents.py
+python scripts/seed_sample_qa.py
+python scripts/run_sample_experiment.py
+```
+
+Visible metrics come from the connected local backend database. Empty states are
+shown instead of fake results when the database has not been seeded.
+
 ## Repository Structure
 
 ```text

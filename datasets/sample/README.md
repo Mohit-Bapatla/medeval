@@ -11,3 +11,12 @@ policies, clinical guidance, or benchmark evidence.
 
 `qa/` contains fictional QA examples for local benchmark workflow development.
 They are not validated benchmark results.
+
+For a dashboard demo, seed documents, seed QA, run the deterministic sample
+experiment, then open the frontend:
+
+```powershell
+python scripts/seed_sample_documents.py
+python scripts/seed_sample_qa.py
+python scripts/run_sample_experiment.py
+```
