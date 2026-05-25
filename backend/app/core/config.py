@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "MedEval"
     VERSION: str = "0.1.0-dev"
     API_V1_PREFIX: str = "/api/v1"
+    EMBEDDING_DIMENSION: int = 384
+    DEFAULT_EMBEDDING_MODEL: str = "deterministic-hash-embedding-384"
+    DEFAULT_CHUNK_SIZE_CHARS: int = 1800
+    DEFAULT_CHUNK_OVERLAP_CHARS: int = 250
+    DEFAULT_MIN_CHUNK_CHARS: int = 200
     DATABASE_URL: str = Field(
         default="postgresql+psycopg://medeval:medeval_dev_password@localhost:5432/medeval"
     )

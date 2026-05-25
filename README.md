@@ -1,4 +1,4 @@
-# MedEval — Healthcare RAG Evaluation & Reliability Platform
+# MedEval - Healthcare RAG Evaluation & Reliability Platform
 
 MedEval is an open-source foundation for evaluating healthcare RAG and LLM systems
 with reproducible datasets, traces, metrics, experiments, and reports.
@@ -10,8 +10,9 @@ adoption claims, or production readiness claims.
 ## Problem
 
 Healthcare RAG systems need more than a working chat interface. Teams need to
-measure whether answers are correct, grounded in retrieved evidence, appropriately
-refused, accurately cited, reproducible, and operationally feasible.
+measure whether answers are correct, grounded in retrieved evidence,
+appropriately refused, accurately cited, reproducible, and operationally
+feasible.
 
 ## Solution
 
@@ -27,12 +28,12 @@ MedEval is planned as a modular evaluation platform for:
 
 ## Architecture Overview
 
-The Batch 0 foundation is a monorepo:
+The current foundation is a monorepo:
 
-- `backend/`: FastAPI service, API routes, settings, database session, Alembic, tests
+- `backend/`: FastAPI service, document/retrieval models, API routes, Alembic, tests
 - `frontend/`: Next.js TypeScript app with a minimal dashboard shell
 - `docs/`: architecture, roadmap, dataset schema, metrics, and development notes
-- `datasets/sample/`: safe sample-data location for future fake/demo examples
+- `datasets/sample/`: synthetic demo documents for local ingestion/retrieval testing
 - `configs/experiments/`: future experiment configuration examples
 - `reports/`: generated report destination, with no real results committed
 
@@ -69,25 +70,53 @@ npm run dev
 Open `http://localhost:3000` for the frontend and `http://localhost:8000/docs`
 for the backend API docs.
 
+## Batch 1 Retrieval Workflow
+
+Create a document:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/documents `
+  -ContentType "application/json" `
+  -Body '{"title":"Synthetic Demo","source_type":"synthetic_demo","document_type":"onboarding_doc","raw_text":"HIPAA training is required before badge access.","metadata":{"demo":true}}'
+```
+
+Chunk, embed, and search:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/documents/<document-id>/chunk
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/documents/<document-id>/embed
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/retrieval/search `
+  -ContentType "application/json" `
+  -Body '{"query":"HIPAA training badge access","top_k":5}'
+```
+
+Batch 1 uses `deterministic-hash-embedding-384`, a local fixed-dimension
+embedding provider that requires no API keys. It is intended for development,
+tests, and demos, not benchmark claims.
+
 ## Repository Structure
 
 ```text
 backend/              FastAPI backend and tests
 frontend/             Next.js dashboard shell
 docs/                 Project documentation
-datasets/sample/      Future fake/demo sample datasets
+datasets/sample/      Synthetic demo sample documents
 configs/experiments/  Future experiment configs
 reports/              Generated local reports
-scripts/              Utility scripts added in later batches
+scripts/              Utility scripts
 docker-compose.yml    Local PostgreSQL + pgvector
 .env.example          Placeholder local configuration
 ```
 
 ## Roadmap
 
-Batch 0 creates the project foundation. Later batches will add database schema,
-dataset import, document ingestion, retrieval, answer generation, evaluation
-metrics, trace storage, reports, dashboard workflows, and CLI commands.
+Batch 0 created the project foundation. Batch 1 adds document storage, text
+cleaning, deterministic chunking, local deterministic embeddings, pgvector-ready
+chunk storage, retrieval search, retrieval logs, and synthetic sample documents.
+
+Later batches will add QA benchmark import, answer generation, evaluation
+metrics, experiment runners, trace review, reports, dashboard workflows, and CLI
+commands.
 
 ## Safety And Privacy
 

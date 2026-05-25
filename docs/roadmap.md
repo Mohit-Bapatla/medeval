@@ -11,16 +11,15 @@
 
 ## Batch 1: Core Data Model
 
-- Projects, datasets, documents, chunks, questions, experiment runs, traces, and
-  metric result tables
-- Initial sample dataset format using fake/demo data only
-- Database migrations and seed examples
+- Documents, chunks, deterministic local embeddings, retrieval queries, and
+  retrieval result logs
+- Synthetic sample healthcare opportunity and onboarding documents
+- Document ingestion, chunking, embedding, and retrieval APIs
 
 ## Batch 2: Dataset And Document Pipeline
 
 - Dataset import validation
-- Document ingestion
-- Text cleaning and chunking
+- QA benchmark dataset schema and import
 - Safe sample fixtures
 
 ## Batch 3: Retrieval And Generation

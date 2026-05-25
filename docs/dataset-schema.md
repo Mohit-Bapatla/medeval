@@ -1,7 +1,31 @@
 # Dataset Schema
 
-MedEval datasets will use explicit, reviewable QA examples. Batch 0 documents the
-planned fields only; real schemas and migrations will come later.
+MedEval stores source documents and chunks now, and will later add explicit,
+reviewable QA examples for evaluation datasets.
+
+## Batch 1 Document Fields
+
+- `title`: document title
+- `source_url`: optional source URL
+- `source_type`: `healthcare_opportunity`, `volunteer_listing`,
+  `onboarding_doc`, `application_instructions`, `compliance_policy`,
+  `synthetic_demo`, or `unknown`
+- `organization_name`: optional organization label
+- `document_type`: document category
+- `raw_text`: original extracted or submitted text
+- `cleaned_text`: conservative cleaned text used for chunking
+- `metadata_json`: non-sensitive structured metadata
+
+## Batch 1 Chunk Fields
+
+- `document_id`: parent document
+- `chunk_index`: deterministic order within the document
+- `chunk_text`: chunk content
+- `token_count`: approximate whitespace token count
+- `char_start` and `char_end`: offsets into cleaned text
+- `embedding`: pgvector-compatible `vector(384)` in PostgreSQL
+- `embedding_model`: default `deterministic-hash-embedding-384`
+- `metadata_json`: non-sensitive chunk metadata
 
 ## Planned QA Example Fields
 

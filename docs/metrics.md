@@ -1,7 +1,8 @@
 # Metrics
 
-MedEval will report metrics for healthcare RAG reliability. Batch 0 defines the
-planned metric vocabulary but does not include validated benchmark results.
+MedEval will report metrics for healthcare RAG reliability. The current code
+supports retrieval data needed for future metrics, but it does not include
+validated benchmark results.
 
 ## Planned Metrics
 
@@ -21,3 +22,6 @@ planned metric vocabulary but does not include validated benchmark results.
 - Cost: estimated provider and infrastructure cost for an experiment.
 - Failure categories: labels for issues such as missing evidence, wrong answer,
   unsupported citation, unsafe refusal, or retrieval miss.
+
+Batch 1 retrieval similarity scores are local development retrieval scores, not
+validated benchmark metrics.

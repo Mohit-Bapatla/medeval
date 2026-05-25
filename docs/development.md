@@ -15,8 +15,8 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-pytest
-ruff check .
+.\.venv\Scripts\python -m pytest
+.\.venv\Scripts\python -m ruff check .
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -38,4 +38,30 @@ cd backend
 alembic upgrade head
 ```
 
-The first migration enables the PostgreSQL `vector` extension for pgvector.
+The first migration enables the PostgreSQL `vector` extension for pgvector. The
+Batch 1 migration adds documents, chunks, retrieval queries, and retrieval
+results.
+
+## Document Retrieval Workflow
+
+After the database is running and migrations are applied, create or upload a
+document, chunk it, embed its chunks, and search retrieval:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/documents `
+  -ContentType "application/json" `
+  -Body '{"title":"Synthetic Demo","source_type":"synthetic_demo","document_type":"onboarding_doc","raw_text":"HIPAA training is required before badge access."}'
+
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/documents/<document-id>/chunk
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/documents/<document-id>/embed
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/retrieval/search `
+  -ContentType "application/json" `
+  -Body '{"query":"HIPAA training badge access","top_k":5}'
+```
+
+Synthetic sample markdown files are available in `datasets/sample/documents/`.
+The seed script can load, chunk, and embed them when a database is available:
+
+```powershell
+python scripts/seed_sample_documents.py
+```
