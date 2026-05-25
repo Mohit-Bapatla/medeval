@@ -36,15 +36,18 @@ commit a real `.env` file.
 ## Database
 
 ```powershell
+cd C:\Users\MOHIT\Projects\medeval
 Copy-Item .env.example .env
 docker compose up -d db
 cd backend
-alembic upgrade head
+.\.venv\Scripts\python -m alembic upgrade head
+.\.venv\Scripts\python -m alembic current
 ```
 
 The first migration enables the PostgreSQL `vector` extension for pgvector. The
 Batch 1 migration adds documents, chunks, retrieval queries, and retrieval
-results.
+results. Batch 4 adds human review records. A local `.env` is ignored by git and
+must not be committed.
 
 ## Document Retrieval Workflow
 
@@ -107,9 +110,16 @@ cd backend
 .\.venv\Scripts\python -m pip install -e ".[dev]"
 .\.venv\Scripts\medeval status
 .\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
-.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval seed-qa --dataset-name "MedEval HealthcareQA Sample" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
 .\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
 ```
 
 CLI report exports include limitations and should not be treated as validated
 benchmark results.
+
+## Batch 5 Demo Validation
+
+Use `docs/demo-checklist.md` for the screenshot and manual validation sequence.
+The checklist covers Docker/Postgres, migrations, backend health/status, CLI
+seeding, deterministic experiment runs, dashboard pages, traces, failures, and
+report exports.

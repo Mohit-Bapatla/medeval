@@ -20,7 +20,7 @@ def main() -> None:
         dataset = dataset_service.create_dataset(
             db,
             DatasetCreate(
-                name="Synthetic Healthcare Opportunity QA",
+                name="MedEval HealthcareQA Sample",
                 description="Fictional QA examples for local MedEval development.",
                 source="synthetic_demo",
                 metadata={"sample_file": str(qa_path.relative_to(REPO_ROOT)), "synthetic": True},

@@ -120,7 +120,7 @@ def seed_qa(
     dataset_name: Annotated[
         str,
         typer.Option(help="Dataset name to create or reuse."),
-    ] = "Synthetic Healthcare Opportunity QA",
+    ] = "MedEval HealthcareQA Sample",
     path: Annotated[
         Path,
         typer.Option(

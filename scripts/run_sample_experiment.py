@@ -20,7 +20,7 @@ def main() -> None:
     with SessionLocal() as db:
         dataset = (
             db.execute(
-                select(Dataset).where(Dataset.name == "Synthetic Healthcare Opportunity QA")
+                select(Dataset).where(Dataset.name == "MedEval HealthcareQA Sample")
             )
             .scalars()
             .first()

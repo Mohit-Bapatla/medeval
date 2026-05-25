@@ -12,9 +12,10 @@ results, synchronous experiment runs, Alembic migrations, and tests.
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-pytest
-ruff check .
-uvicorn app.main:app --reload --port 8000
+.\.venv\Scripts\python -m alembic upgrade head
+.\.venv\Scripts\python -m pytest
+.\.venv\Scripts\python -m ruff check .
+.\.venv\Scripts\python -m uvicorn app.main:app --reload --port 8000
 ```
 
 The backend reads configuration from environment variables. A root `.env.example`
@@ -68,9 +69,12 @@ CLI examples:
 ```powershell
 .\.venv\Scripts\medeval status
 .\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
-.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval seed-qa --dataset-name "MedEval HealthcareQA Sample" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
 .\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
 ```
+
+Run these CLI examples from `backend/` after Postgres is running and Alembic
+migrations have been applied.
 
 New API endpoints:
 

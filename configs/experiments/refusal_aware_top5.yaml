@@ -1,5 +1,5 @@
 name: Synthetic refusal-aware top5 v0.1
-dataset_name: Synthetic Healthcare Opportunity QA
+dataset_name: MedEval HealthcareQA Sample
 description: Local deterministic run emphasizing answerability/refusal examples; not a validated benchmark.
 model_provider: deterministic_local
 model_name: deterministic-extractive-answer-v1

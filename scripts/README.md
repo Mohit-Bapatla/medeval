@@ -43,7 +43,7 @@ The backend package also installs a Typer CLI for the same local workflows:
 cd backend
 .\.venv\Scripts\medeval status
 .\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
-.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval seed-qa --dataset-name "MedEval HealthcareQA Sample" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
 .\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
 ```
 

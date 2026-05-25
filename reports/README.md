@@ -21,6 +21,7 @@ CLI examples:
 ```powershell
 cd backend
 .\.venv\Scripts\medeval export-report --experiment-id <experiment-id> --format markdown --out ..\reports\example_report.md
+.\.venv\Scripts\medeval export-report --experiment-id <experiment-id> --format json --out ..\reports\example_report.json
 .\.venv\Scripts\medeval export-results --experiment-id <experiment-id> --format csv --out ..\reports\results.csv
 ```
 

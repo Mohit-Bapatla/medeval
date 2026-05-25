@@ -43,3 +43,11 @@
 Future batches can add governed provider integrations, comparison workflows, and
 stronger evaluation methods without committing secrets or claiming validation
 from synthetic samples.
+
+## Batch 5: Local Demo Validation
+
+- Verify Docker/Postgres/pgvector startup when Docker is available.
+- Validate Alembic migrations through the latest head.
+- Validate CLI seeding, deterministic experiment runs, reports, and CSV exports.
+- Validate dashboard pages, trace viewer, failure analysis, and report preview.
+- Fix only workflow blockers and document exact demo commands.

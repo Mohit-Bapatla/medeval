@@ -57,14 +57,15 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-pytest
-uvicorn app.main:app --reload --port 8000
+.\.venv\Scripts\python -m alembic upgrade head
+.\.venv\Scripts\python -m pytest
+.\.venv\Scripts\python -m uvicorn app.main:app --reload --port 8000
 ```
 
 ```powershell
 cd frontend
-npm install
-npm run dev
+npm.cmd install
+npm.cmd run dev
 ```
 
 Open `http://localhost:3000` for the frontend and `http://localhost:8000/docs`
@@ -169,7 +170,7 @@ Example deterministic workflow:
 cd backend
 .\.venv\Scripts\medeval status
 .\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
-.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval seed-qa --dataset-name "MedEval HealthcareQA Sample" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
 .\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
 ```
 
@@ -183,6 +184,26 @@ Reports can be exported after a local experiment:
 Claim-level support uses deterministic token overlap against cited retrieved
 chunks. It is useful for debugging traces, but it is not medically validated or
 benchmark-grade.
+
+## Batch 5 Verified Demo Flow
+
+Batch 5 hardens the local demo path. The intended PowerShell flow is:
+
+```powershell
+cd C:\Users\MOHIT\Projects\medeval
+Copy-Item .env.example .env
+docker compose up -d db
+cd backend
+.\.venv\Scripts\python -m alembic upgrade head
+.\.venv\Scripts\medeval status
+.\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
+.\.venv\Scripts\medeval seed-qa --dataset-name "MedEval HealthcareQA Sample" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
+```
+
+Then start the backend and frontend, open `http://localhost:3000`, and follow
+`docs/demo-checklist.md`. If Docker is unavailable, Postgres/pgvector runtime
+validation cannot be completed locally and should not be claimed.
 
 ## Repository Structure
 

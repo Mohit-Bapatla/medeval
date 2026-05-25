@@ -10,8 +10,8 @@ npm install
 npm run dev
 ```
 
-The app expects the backend API at `http://localhost:8000/api/v1` unless
-`NEXT_PUBLIC_API_BASE_URL` is set.
+The app expects the backend API at `http://localhost:8000/api/v1`. If you set
+`NEXT_PUBLIC_API_BASE_URL`, include the `/api/v1` suffix.
 
 ## Pages
 

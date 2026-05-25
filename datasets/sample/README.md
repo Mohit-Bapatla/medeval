@@ -26,10 +26,13 @@ Batch 4 also supports the CLI workflow:
 ```powershell
 cd backend
 .\.venv\Scripts\medeval seed-docs --path ..\datasets\sample\documents
-.\.venv\Scripts\medeval seed-qa --dataset-name "Synthetic Healthcare Opportunity QA" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
+.\.venv\Scripts\medeval seed-qa --dataset-name "MedEval HealthcareQA Sample" --path ..\datasets\sample\qa\healthcare_qa_sample.jsonl
 .\.venv\Scripts\medeval run-experiment --config ..\configs\experiments\baseline_deterministic.yaml
 ```
 
 See `docs/benchmark-card.md` for the synthetic sample benchmark card. It
 documents intended use, limitations, and the fact that this sample is not
 validated healthcare data.
+
+For end-to-end demo validation, follow `docs/demo-checklist.md` after starting
+Postgres, applying migrations, and running the CLI seed commands.

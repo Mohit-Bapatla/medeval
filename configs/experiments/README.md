@@ -7,7 +7,7 @@ Example:
 
 ```yaml
 name: Synthetic deterministic baseline v0.1
-dataset_name: Synthetic Healthcare Opportunity QA
+dataset_name: MedEval HealthcareQA Sample
 model_provider: deterministic_local
 model_name: deterministic-extractive-answer-v1
 embedding_model: deterministic-hash-embedding-384
