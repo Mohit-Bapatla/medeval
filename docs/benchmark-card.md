@@ -1,44 +1,97 @@
-# MedEval HealthcareQA Sample v0.1
+# Benchmark Card: MedEval HealthcareQA Sample v0.1
 
 ## Status
 
-This is a synthetic/demo benchmark card for local MedEval development. It is not a
-validated healthcare benchmark, clinical evaluation, or evidence of production use.
+This is a synthetic/demo dataset card for local MedEval development. It is not a
+validated benchmark, clinical evaluation, healthcare validation artifact, or
+evidence of production use.
+
+## Dataset Name
+
+MedEval HealthcareQA Sample v0.1
 
 ## Purpose
 
-The sample is designed to exercise MedEval workflows for document ingestion,
-retrieval, citation-grounded answering, response tracing, deterministic heuristic
+The sample exercises MedEval workflows for document ingestion, retrieval,
+citation-grounded answering, response tracing, deterministic heuristic
 evaluation, failure analysis, and report export.
 
-## Data
+## Source
 
-- Documents: synthetic healthcare opportunity and onboarding documents under
-  `datasets/sample/documents/`
-- QA examples: synthetic examples under
-  `datasets/sample/qa/healthcare_qa_sample.jsonl`
-- Domains covered: eligibility, deadlines, required documents, scheduling,
-  HIPAA/onboarding, application process, location, and unanswerable questions
-- Data excluded: real patient data, private student data, real organization
-  claims, and real benchmark results
+All documents and QA examples are handcrafted synthetic demo content stored in
+this repository:
+
+- `datasets/sample/documents/`
+- `datasets/sample/qa/healthcare_qa_sample.jsonl`
+
+## Synthetic Status
+
+The dataset is entirely synthetic. It does not contain real patient data,
+private student data, real organization records, or real clinical evidence.
+
+## Current Contents
+
+- Documents: 5 synthetic healthcare opportunity/onboarding documents
+- QA examples: 22 synthetic QA examples
+- Answerability split in the checked-in JSONL:
+  - answerable: 18
+  - unanswerable: 4
+- Topic categories include:
+  - application process
+  - benefits
+  - boundaries
+  - deadlines
+  - eligibility
+  - HIPAA training
+  - limitations
+  - location
+  - onboarding
+  - privacy
+  - required documents
+  - role responsibilities
+  - role scope
+  - schedule
 
 ## Intended Use
 
 - Local development smoke tests
-- Demonstrating trace, evaluation, and report workflows
-- Reproducible deterministic examples for contributors
+- Contributor onboarding
+- Demonstrating trace, evaluation, failure analysis, and report workflows
+- Testing deterministic local providers without paid APIs
 
-## Not Intended Use
+## Out-Of-Scope Use
 
 - Clinical validation
 - Healthcare safety claims
+- Production readiness claims
 - Measuring real-world provider performance
-- Reporting benchmark results without a separately reviewed dataset and protocol
+- Publishing benchmark results without a separately reviewed dataset, protocol,
+  and evaluation process
+
+## Evaluation Notes
+
+The sample can be used to run a deterministic local demo experiment. Any scores
+from that run are synthetic local development output, not validated benchmark
+results.
+
+## Safety And Privacy
+
+- No real patient data
+- No private student data
+- No secrets
+- No real healthcare organization records
+- No clinical review claim
+
+## License Note
+
+The sample data is part of this MIT-licensed repository unless a future dataset
+release states otherwise.
 
 ## Limitations
 
-- All content is synthetic and intentionally small.
+- The dataset is intentionally small.
 - The deterministic answer provider is not a real LLM.
-- The deterministic evaluator uses heuristic token overlap and citation checks.
-- Results generated from this sample are development artifacts, not benchmark
-  claims.
+- The deterministic evaluator uses heuristic overlap and citation checks.
+- Evidence links are designed for local demo traceability, not clinical review.
+- Results generated from this sample should be labeled as synthetic deterministic
+  demo output.

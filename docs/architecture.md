@@ -1,73 +1,168 @@
 # Architecture
 
-MedEval is planned as a modular healthcare RAG evaluation platform. Batch 2 adds
-the first QA benchmark, deterministic RAG trace, evaluation, and experiment
-foundation while keeping paid providers and advanced judges out of scope.
+MedEval is a modular evaluation platform for healthcare-adjacent RAG and LLM
+systems. It is built to inspect reliability, evidence grounding, citation
+behavior, retrieval quality, refusals, traces, and reports. It is not a chatbot
+and it does not claim clinical validation.
 
-## Planned Layers
+## High-Level Flow
 
-- Data/document layer: ingest source documents, clean text, chunk content, and
-  track safe dataset provenance for fake/demo or properly governed data.
-- Retrieval layer: create embeddings, store vectors in PostgreSQL with pgvector,
-  run retrieval experiments, and record retrieved evidence.
-- Generation layer: call model providers through an abstraction that supports
-  answer generation, citations, refusals, latency tracking, and cost estimates.
-- Evaluation layer: compute correctness, groundedness, hallucination, refusal,
-  citation, and retrieval metrics.
-- Experiment/reporting layer: run reproducible evaluations, store traces and
-  failures, compare runs, and export reports.
-- Dashboard layer: provide a focused UI for experiments, traces, metrics, and
-  reports rather than a generic chatbot.
+```mermaid
+flowchart LR
+  A["Synthetic or governed documents"] --> B["Text cleaning"]
+  B --> C["Deterministic chunking"]
+  C --> D["Embedding provider"]
+  D --> E["PostgreSQL + pgvector"]
+  E --> F["Retriever"]
+  F --> G["RAG answer provider"]
+  G --> H["Model response trace"]
+  H --> I["Evaluation harness"]
+  I --> J["Experiment results"]
+  J --> K["Dashboard + reports"]
+```
 
-## Batch 1 Backend Flow
+## Backend Service Layers
 
-- Documents are created from JSON or uploaded text/markdown/PDF files.
-- Text is cleaned conservatively to preserve evidence and section wording.
-- Documents are chunked deterministically with character offsets.
-- Chunks are embedded using `deterministic-hash-embedding-384` by default.
-- PostgreSQL stores embeddings in a pgvector-compatible `vector(384)` column.
-- SQLite tests use an isolated JSON-text vector fallback.
-- Retrieval embeds the query, applies optional filters, scores chunks, returns
-  top-k results, and stores lightweight retrieval query/result logs.
+- **API layer**: FastAPI routes under `/api/v1` for documents, retrieval,
+  datasets, QA examples, prompts, RAG answers, responses, evaluations,
+  experiments, reports, dashboard summary, and human reviews.
+- **Schema layer**: Pydantic request/response models keep API shapes explicit.
+- **Service layer**: ingestion, text cleaning, chunking, embeddings, retrieval,
+  datasets, prompt rendering, deterministic answer generation, RAG traces,
+  evaluation, experiment execution, reporting, config loading, and CLI support.
+- **Evaluation layer**: deterministic correctness, grounding, citation,
+  retrieval, refusal, hallucination, failure taxonomy, and claim-support
+  heuristics.
+- **Persistence layer**: SQLAlchemy models and Alembic migrations for
+  PostgreSQL/pgvector, with isolated SQLite test fallbacks where needed.
 
-## Current Boundaries
+## Database Entities
 
-The current implementation uses deterministic local answer generation and MVP
-heuristic evaluators. It does not call real provider APIs, perform clinical
-validation, or report validated benchmark results.
+```mermaid
+erDiagram
+  documents ||--o{ document_chunks : contains
+  documents ||--o{ qa_examples : references
+  datasets ||--o{ qa_examples : contains
+  qa_examples ||--o{ evidence_links : expects
+  document_chunks ||--o{ evidence_links : supports
+  experiments ||--o{ model_responses : produces
+  qa_examples ||--o{ model_responses : answered_by
+  model_responses ||--o{ response_retrieved_chunks : stores
+  document_chunks ||--o{ response_retrieved_chunks : retrieved_as
+  model_responses ||--o{ evaluation_results : evaluated_by
+  model_responses ||--o{ human_reviews : reviewed_by
+  prompt_templates ||--o{ experiments : configures
+  prompt_templates ||--o{ model_responses : used_for
+```
 
-## Batch 2 Evaluation Flow
+Core tables include documents, document chunks, retrieval logs, datasets, QA
+examples, evidence links, prompt templates, experiments, model responses,
+response retrieved chunks, evaluation results, and human reviews.
 
-- Datasets contain QA examples with answerability, category, difficulty, risk,
-  gold answers, and optional expected behavior.
-- Evidence links connect QA examples to required, acceptable, or supporting
-  chunks.
-- RAG traces store retrieved chunks, cited chunks, provider output, latency,
-  token estimates, and estimated cost.
-- Evaluation results store deterministic heuristic retrieval, citation, refusal,
-  correctness, groundedness, hallucination, failure type, and overall scores.
-- Experiments synchronously run a small dataset through RAG and evaluation, then
-  expose aggregate metrics.
+## Retrieval Flow
 
-## Batch 3 Dashboard Layer
+```mermaid
+sequenceDiagram
+  participant User
+  participant API
+  participant RetrievalService
+  participant Embeddings
+  participant DB as PostgreSQL/pgvector
 
-- The frontend reads typed API responses from the local FastAPI backend.
-- Overview counts, experiment metrics, failure analysis, traces, and reports are
-  computed from stored backend data.
-- The trace viewer is the primary inspection surface: it shows question, gold
-  answer, model answer, retrieved chunks, cited chunks, scores, failure type,
-  provider metadata, and raw structured output.
-- Report previews are computed Markdown/JSON responses and are not persisted
-  artifacts in Batch 3.
+  User->>API: POST /retrieval/search
+  API->>RetrievalService: query + filters
+  RetrievalService->>Embeddings: embed query
+  Embeddings-->>RetrievalService: deterministic vector
+  RetrievalService->>DB: vector similarity search
+  DB-->>RetrievalService: ranked chunks
+  RetrievalService-->>API: chunks + scores + metadata
+  API-->>User: retrieval response
+```
 
-## Batch 4 Evaluation And Workflow Layer
+The default development embedding provider is deterministic and local. It is
+useful for tests and sample demos, but it is not a semantic embedding model for
+real evaluation.
 
-- Claim extraction and citation support checks live in `backend/app/evals/` as
-  deterministic heuristics.
-- Evaluation results keep claim-support metrics and failure analysis details in
-  `metadata_json` so the schema remains flexible.
-- Human review records are stored separately because they are authored records,
-  not derived evaluator output.
-- YAML configs and the CLI provide reproducible local runs over synthetic data.
-- Report exports are computed from stored experiments and always include
-  limitations and non-validation disclaimers.
+## RAG And Evaluation Flow
+
+```mermaid
+sequenceDiagram
+  participant Runner
+  participant RAG
+  participant Retriever
+  participant Provider as Deterministic answer provider
+  participant Evaluator
+  participant DB
+
+  Runner->>RAG: QA example + experiment config
+  RAG->>Retriever: retrieve top-k chunks
+  Retriever-->>RAG: evidence candidates
+  RAG->>Provider: prompt + question + chunks
+  Provider-->>RAG: structured answer + citations
+  RAG->>DB: store response trace
+  RAG->>Evaluator: response + evidence links + retrieved chunks
+  Evaluator-->>DB: store scores, claim support, failure metadata
+```
+
+The deterministic answer provider never uses the gold answer to generate a
+response. It exists so developers can run the full loop without paid APIs or
+external services.
+
+## Experiment And Report Flow
+
+```mermaid
+flowchart TD
+  A["YAML experiment config"] --> B["Typer CLI or API"]
+  B --> C["Experiment service"]
+  C --> D["Run QA examples synchronously"]
+  D --> E["Store responses and evaluations"]
+  E --> F["Aggregate metrics"]
+  F --> G["Dashboard"]
+  F --> H["Markdown report"]
+  F --> I["JSON report"]
+  F --> J["CSV results"]
+```
+
+Experiments are synchronous and small-dataset oriented today. Reports are
+computed from the local database and include limitations/disclaimers.
+
+## Frontend Dashboard Flow
+
+The Next.js dashboard uses a typed fetch client pointed at
+`NEXT_PUBLIC_API_BASE_URL`, defaulting to `http://localhost:8000/api/v1`.
+Dashboard pages read backend state directly:
+
+- overview summary counts
+- documents and chunks
+- datasets, QA examples, and evidence links
+- experiments and aggregate metrics
+- response traces with retrieved/cited chunks
+- claim support and failure metadata
+- report previews and downloads
+
+Empty states explain how to seed sample data instead of hardcoding fake metrics.
+
+## CLI Flow
+
+The Typer CLI wraps repeatable local demo workflows:
+
+```mermaid
+flowchart LR
+  A["medeval status"] --> B["seed-docs"]
+  B --> C["seed-qa"]
+  C --> D["run-experiment"]
+  D --> E["export-report"]
+  D --> F["export-results"]
+```
+
+CLI commands respect the configured `DATABASE_URL`, do not require API keys, and
+are intended for synthetic local demo runs unless a future governed data process
+is added.
+
+## Boundaries
+
+- No real patient data is included.
+- No private student data is included.
+- No real provider APIs are called by tests or local deterministic workflows.
+- Current metrics are heuristic and not clinically validated.
+- Synthetic sample outputs are not benchmark results.
