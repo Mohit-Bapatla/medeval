@@ -37,7 +37,14 @@ def test_experiment_responses_failures_report_and_trace(client: TestClient) -> N
 
     failures = client.get(f"/api/v1/experiments/{experiment_id}/failures")
     assert failures.status_code == 200
-    assert isinstance(failures.json(), list)
+    failure_rows = failures.json()
+    assert isinstance(failure_rows, list)
+    if failure_rows:
+        assert "failure_reason" in failure_rows[0]
+        assert "primary_failure_type" in failure_rows[0]
+        assert "secondary_failure_types" in failure_rows[0]
+        assert "retrieval_failure" in failure_rows[0]
+        assert "generation_failure" in failure_rows[0]
 
     trace = client.get(f"/api/v1/responses/{response_id}/trace")
     assert trace.status_code == 200

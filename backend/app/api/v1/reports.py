@@ -170,7 +170,9 @@ def serialize_failure_row(response: ModelResponse) -> ExperimentFailureRow | Non
     row = serialize_response_row(response)
     if row.failure_type in {None, "none"} and not row.hallucination_flag:
         return None
-    return ExperimentFailureRow(**row.model_dump(), failure_reason=row.failure_type or "flagged")
+    payload = row.model_dump()
+    payload["failure_reason"] = row.failure_reason or row.failure_type or "flagged"
+    return ExperimentFailureRow(**payload)
 
 
 def serialize_response_trace(response: ModelResponse) -> ResponseTraceRead:
