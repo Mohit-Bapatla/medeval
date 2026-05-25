@@ -38,21 +38,22 @@ def main() -> None:
                     },
                 ),
             )
+        dataset_id = dataset.id
         existing_example = (
-            db.execute(select(QAExample).where(QAExample.dataset_id == dataset.id))
+            db.execute(select(QAExample).where(QAExample.dataset_id == dataset_id))
             .scalars()
             .first()
         )
         if existing_example is not None:
             print(
-                f"Dataset {dataset.id} already has QA examples; skipping import. "
+                f"Dataset {dataset_id} already has QA examples; skipping import. "
                 "Use a fresh database or delete the dataset to reseed."
             )
             return
-        result = qa_import_service.import_jsonl(db, dataset.id, qa_path.read_text(encoding="utf-8"))
+        result = qa_import_service.import_jsonl(db, dataset_id, qa_path.read_text(encoding="utf-8"))
         print(
             "Seeded dataset "
-            f"{dataset.id}: {result.imported_examples} examples, "
+            f"{dataset_id}: {result.imported_examples} examples, "
             f"{result.evidence_links_created} evidence links, "
             f"{result.skipped_evidence_links} skipped evidence links"
         )

@@ -1,6 +1,13 @@
+import json
+
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 from typer.testing import CliRunner
 
-from app.cli import app
+import app.cli as cli_module
+from app.db.base import Base
+from app.models.qa_example import QAExample
 from app.services.config_service import config_service
 from tests.batch2_helpers import create_dataset_with_example_and_evidence
 
@@ -44,6 +51,67 @@ def test_report_markdown_and_csv_exports(client) -> None:
 
 def test_cli_help_smoke() -> None:
     runner = CliRunner()
-    result = runner.invoke(app, ["--help"])
+    result = runner.invoke(cli_module.app, ["--help"])
     assert result.exit_code == 0
     assert "MedEval deterministic local development CLI" in result.output
+
+
+def test_cli_seed_qa_does_not_access_detached_dataset(monkeypatch, tmp_path) -> None:
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+    )
+    monkeypatch.setattr(cli_module, "SessionLocal", testing_session_local)
+    qa_path = tmp_path / "sample.jsonl"
+    qa_path.write_text(
+        json.dumps(
+            {
+                "question": "Is this synthetic?",
+                "gold_answer": "Yes, this is synthetic demo data.",
+                "answerability": "answerable",
+                "category": "demo",
+                "difficulty": "easy",
+                "risk_level": "low",
+                "metadata": {"synthetic": True},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    first = runner.invoke(
+        cli_module.app,
+        [
+            "seed-qa",
+            "--dataset-name",
+            "MedEval HealthcareQA Sample",
+            "--path",
+            str(qa_path),
+        ],
+    )
+    second = runner.invoke(
+        cli_module.app,
+        [
+            "seed-qa",
+            "--dataset-name",
+            "MedEval HealthcareQA Sample",
+            "--path",
+            str(qa_path),
+        ],
+    )
+
+    assert first.exit_code == 0, first.output
+    assert "Seeded dataset" in first.output
+    assert second.exit_code == 0, second.output
+    assert "already has QA examples; skipping import" in second.output
+    with testing_session_local() as db:
+        examples = db.execute(select(QAExample)).scalars().all()
+        assert len(examples) == 1

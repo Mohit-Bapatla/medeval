@@ -147,20 +147,21 @@ def seed_qa(
                     metadata={"sample_file": str(path), "synthetic": True},
                 ),
             )
+        dataset_id = dataset.id
         existing_example = (
-            db.execute(select(QAExample).where(QAExample.dataset_id == dataset.id))
+            db.execute(select(QAExample).where(QAExample.dataset_id == dataset_id))
             .scalars()
             .first()
         )
         if existing_example is not None:
             typer.echo(
-                f"Dataset {dataset.id} already has QA examples; skipping import. "
+                f"Dataset {dataset_id} already has QA examples; skipping import. "
                 "Use a fresh database or delete the dataset to reseed."
             )
             return
-        result = qa_import_service.import_jsonl(db, dataset.id, path.read_text(encoding="utf-8"))
+        result = qa_import_service.import_jsonl(db, dataset_id, path.read_text(encoding="utf-8"))
     typer.echo(
-        f"Seeded dataset {dataset.id}: {result.imported_examples} examples, "
+        f"Seeded dataset {dataset_id}: {result.imported_examples} examples, "
         f"{result.evidence_links_created} evidence links, "
         f"{result.skipped_evidence_links} skipped evidence links"
     )
@@ -178,8 +179,9 @@ def run_experiment(
         experiment_config = config_service.load_experiment_config(config)
         experiment = experiment_service.create_experiment_from_config(db, experiment_config)
         examples, responses, evaluations = experiment_service.run_experiment(db, experiment)
+        experiment_id = experiment.id
         summary = experiment_service.aggregate_results(db, experiment.id)
-    typer.echo(f"Experiment ID: {experiment.id}")
+    typer.echo(f"Experiment ID: {experiment_id}")
     typer.echo(
         f"Run complete: {examples} examples, {responses} responses, {evaluations} evaluations"
     )
