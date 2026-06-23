@@ -20,6 +20,7 @@ from app.datasets.schemas import (
 REQUIRED_DATASET_PATHS = [
     Path("README.md"),
     Path("documents"),
+    Path("metadata/docs.json"),
     Path("qa/README.md"),
     Path("metadata/docs.example.json"),
     Path("metadata/labels.example.json"),
@@ -31,6 +32,7 @@ REQUIRED_DATASET_PATHS = [
 class DatasetValidationResult:
     dataset_path: Path
     documents: list[BenchmarkDocumentMetadata] = field(default_factory=list)
+    example_documents: list[BenchmarkDocumentMetadata] = field(default_factory=list)
     qa_examples: list[BenchmarkQAExample] = field(default_factory=list)
     labels: list[BenchmarkLabelMetadata] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
@@ -52,10 +54,16 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
     _validate_taxonomy(taxonomy, errors)
 
     documents = _load_json_list(
-        root / "metadata" / "docs.example.json",
+        root / "metadata" / "docs.json",
         BenchmarkDocumentMetadata,
         errors,
         label="document metadata",
+    )
+    example_documents = _load_json_list(
+        root / "metadata" / "docs.example.json",
+        BenchmarkDocumentMetadata,
+        errors,
+        label="example document metadata",
     )
     labels = _load_json_list(
         root / "metadata" / "labels.example.json",
@@ -68,12 +76,22 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
     for jsonl_path in sorted((root / "qa").glob("*.jsonl")):
         qa_examples.extend(_load_qa_jsonl(jsonl_path, errors))
 
-    doc_ids = {document.doc_id for document in documents}
-    for document in documents:
+    _validate_unique_doc_ids(documents, errors, label="docs.json")
+    _validate_unique_doc_ids(example_documents, errors, label="docs.example.json")
+    real_doc_ids = {document.doc_id for document in documents}
+    example_doc_ids = {document.doc_id for document in example_documents}
+    overlapping_doc_ids = sorted(real_doc_ids & example_doc_ids)
+    if overlapping_doc_ids:
+        errors.append(
+            "Real and example document metadata share doc_id values: "
+            f"{', '.join(overlapping_doc_ids)}"
+        )
+
+    doc_ids = real_doc_ids | example_doc_ids
+    for document in [*documents, *example_documents]:
         if not (root / document.document_path).exists():
             errors.append(
-                f"{document.doc_id}: document_path is an example placeholder and does not exist: "
-                f"{document.document_path}"
+                f"{document.doc_id}: document_path does not exist: {document.document_path}"
             )
 
     qa_ids = set()
@@ -101,6 +119,7 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
     return DatasetValidationResult(
         dataset_path=root,
         documents=documents,
+        example_documents=example_documents,
         qa_examples=qa_examples,
         labels=labels,
         errors=errors,
@@ -120,6 +139,7 @@ def dataset_statistics(dataset_path: Path) -> dict[str, Any]:
         "valid": result.ok,
         "errors": result.errors,
         "document_count": len(result.documents),
+        "example_document_count": len(result.example_documents),
         "qa_count": len(result.qa_examples),
         "label_count": len(result.labels),
         "refusal_count": refusal_count,
@@ -129,6 +149,15 @@ def dataset_statistics(dataset_path: Path) -> dict[str, Any]:
         "answer_types": dict(sorted(answer_types.items())),
         "source_types": dict(sorted(source_types.items())),
     }
+
+
+def _validate_unique_doc_ids(
+    documents: list[BenchmarkDocumentMetadata], errors: list[str], label: str
+) -> None:
+    counts = Counter(document.doc_id for document in documents)
+    duplicates = sorted(doc_id for doc_id, count in counts.items() if count > 1)
+    if duplicates:
+        errors.append(f"{label}: duplicate doc_id values: {', '.join(duplicates)}")
 
 
 def _load_taxonomy(path: Path, errors: list[str]) -> dict[str, Any]:
