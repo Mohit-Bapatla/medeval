@@ -5,13 +5,14 @@ dataset scaffold plus a small seed set of real public healthcare source
 documents. It is not a completed benchmark, validated clinical dataset, or
 source of benchmark results.
 
-Current Batch 3A status:
+Current Batch 4 status:
 
 - Real public source documents: 14
 - Real evidence-linked QA examples: 92
 - QA split counts: 60 main evaluation, 15 hard, 17 refusal
 - Example QA fixtures: 3 small schema examples kept separate from real stats
-- Multi-config benchmark runs and reports: future batches
+- Deterministic local baseline config: available
+- Multi-config benchmark runs and provider comparisons: future batches
 - Clinical validation: none
 
 ## Intended Contents
@@ -92,3 +93,37 @@ medeval dataset-stats --path ../datasets/medeval-v1
 
 The validator checks the expected folder structure, JSON/JSONL schema, taxonomy
 values, duplicate document and QA IDs, metadata references, and document paths.
+
+## Run MedEval v1 Locally
+
+From the repository root, start the database if needed:
+
+```bash
+docker compose up -d db
+```
+
+Then from `backend/`:
+
+```bash
+python -m alembic upgrade head
+medeval validate-dataset --path ../datasets/medeval-v1
+medeval dataset-stats --path ../datasets/medeval-v1
+medeval seed-dataset --path ../datasets/medeval-v1 --dataset-name "MedEval v1 Public Healthcare Seed"
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic.yaml
+```
+
+The deterministic config uses the local deterministic provider only. It does
+not call OpenAI, Anthropic, or any external model API.
+
+After `run-experiment` prints an experiment ID, export local deterministic
+artifacts with:
+
+```bash
+medeval export-report --experiment-id <experiment-id> --format markdown --out ../reports/medeval_v1_seed_report.md
+medeval export-report --experiment-id <experiment-id> --format json --out ../reports/medeval_v1_seed_report.json
+medeval export-results --experiment-id <experiment-id> --format csv --out ../reports/medeval_v1_seed_results.csv
+```
+
+These reports are local deterministic baseline artifacts for an in-development
+public healthcare seed dataset. They are not clinically validated, not medical
+advice, and not benchmark-complete results.

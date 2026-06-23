@@ -21,6 +21,7 @@ from app.services.dataset_service import dataset_service
 from app.services.embedding_service import get_embedding_provider
 from app.services.experiment_service import experiment_service
 from app.services.ingestion_service import ingestion_service
+from app.services.medeval_v1_seed_service import medeval_v1_seed_service
 from app.services.qa_import_service import qa_import_service
 from app.services.report_export_service import report_export_service
 
@@ -107,6 +108,16 @@ def seed_docs(
     ],
 ) -> None:
     """Seed, chunk, and embed synthetic sample documents."""
+    medeval_root = path.parent if path.name == "documents" else path
+    if (medeval_root / "metadata" / "docs.json").exists():
+        with SessionLocal() as db:
+            _, created, skipped, chunks = medeval_v1_seed_service.seed_documents(db, medeval_root)
+        typer.echo(
+            "MedEval v1 documents seeded: "
+            f"{created}; skipped existing: {skipped}; chunks created: {chunks}"
+        )
+        return
+
     provider = get_embedding_provider()
     with SessionLocal() as db:
         created = 0
@@ -158,6 +169,46 @@ def seed_docs(
             created += 1
             typer.echo(f"Seeded {sample_file}: {len(chunks)} chunks")
     typer.echo(f"Documents seeded: {created}; skipped existing: {skipped}")
+
+
+@app.command("seed-dataset")
+def seed_dataset(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Path to a validated MedEval filesystem dataset directory.",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+        ),
+    ],
+    dataset_name: Annotated[
+        str,
+        typer.Option(help="Dataset name to create or reuse."),
+    ] = "MedEval v1 Public Healthcare Seed",
+) -> None:
+    """Validate and seed MedEval v1 documents plus real QA splits into the database."""
+    try:
+        with SessionLocal() as db:
+            result = medeval_v1_seed_service.seed_dataset(db, path, dataset_name)
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(f"Dataset: {result.dataset_name} ({result.dataset_id})")
+    typer.echo(
+        f"Documents seeded: {result.documents_seeded}; skipped existing: "
+        f"{result.documents_skipped}; chunks created: {result.chunks_created}"
+    )
+    typer.echo(
+        f"QA examples seeded: {result.qa_examples_seeded}; skipped existing: "
+        f"{result.qa_examples_skipped}"
+    )
+    typer.echo(
+        f"Evidence links created: {result.evidence_links_created}; skipped: "
+        f"{result.evidence_links_skipped}"
+    )
+    typer.echo(f"Splits included: {', '.join(result.splits_included)}")
 
 
 @app.command("seed-qa")

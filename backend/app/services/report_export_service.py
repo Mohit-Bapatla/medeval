@@ -14,9 +14,10 @@ from app.models.model_response import ModelResponse
 from app.services.experiment_service import experiment_service
 
 DISCLAIMER = (
-    "This report is computed from the connected local database. Synthetic sample data, "
-    "deterministic providers, and heuristic evaluators are not validated benchmarks, "
-    "clinical validation, healthcare validation, or production-use evidence."
+    "This report is computed from the connected local database. Synthetic samples or "
+    "in-development public healthcare seed datasets, deterministic providers, and "
+    "heuristic evaluators are not validated benchmarks, clinical validation, medical "
+    "advice, healthcare validation, or production-use evidence."
 )
 
 
@@ -48,7 +49,7 @@ class ReportExportService:
                 ),
                 "claim_metrics": claim_metrics,
                 "limitations": [
-                    "Synthetic sample data may be demo-only.",
+                    "Synthetic samples and public healthcare seed datasets are in development.",
                     "The deterministic answer provider is not a real LLM.",
                     "The heuristic evaluator is not clinical validation.",
                 ],
@@ -196,7 +197,7 @@ class ReportExportService:
                 "",
                 "## Limitations",
                 "",
-                "- Synthetic sample data is for development and demonstration only.",
+                "- Synthetic samples and public healthcare seed datasets are for development only.",
                 "- The deterministic provider is not a real LLM.",
                 "- The heuristic evaluator is not clinical validation or healthcare validation.",
                 "- This report does not claim real-world performance or adoption.",

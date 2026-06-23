@@ -6,13 +6,14 @@ MedEval v1 is currently an in-development dataset scaffold with a small seed set
 of real public healthcare source documents. It is not a completed benchmark and
 does not contain validated benchmark results.
 
-Current Batch 3A contents:
+Current Batch 4 contents:
 
 - 14 concise public-document seed files
 - source metadata in `datasets/medeval-v1/metadata/docs.json`
 - controlled taxonomy metadata
 - 92 real evidence-linked QA examples
 - 3 small QA example fixtures kept separate from real dataset stats
+- deterministic local baseline config and seed command support
 - no clinical validation
 
 ## Intended Use
@@ -88,3 +89,22 @@ The initial filesystem validator checks structure, schema compatibility,
 taxonomy-controlled values, duplicate QA IDs, label references, and document
 metadata links. Passing validation means the fixture is structurally well formed;
 it does not mean the dataset is clinically validated or benchmark-grade.
+
+## Local Run Workflow
+
+MedEval v1 can be seeded into the backend pipeline with:
+
+```bash
+cd backend
+python -m alembic upgrade head
+medeval validate-dataset --path ../datasets/medeval-v1
+medeval dataset-stats --path ../datasets/medeval-v1
+medeval seed-dataset --path ../datasets/medeval-v1 --dataset-name "MedEval v1 Public Healthcare Seed"
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic.yaml
+```
+
+Then export local deterministic reports with `medeval export-report` and
+`medeval export-results` using the experiment ID printed by `run-experiment`.
+The deterministic baseline is an in-development public healthcare seed run. It
+does not use external model APIs and does not establish clinical validation,
+medical advice quality, production readiness, or benchmark completeness.
