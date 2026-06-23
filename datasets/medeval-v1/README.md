@@ -5,12 +5,13 @@ dataset scaffold plus a small seed set of real public healthcare source
 documents. It is not a completed benchmark, validated clinical dataset, or
 source of benchmark results.
 
-Current Batch 2 status:
+Current Batch 3A status:
 
 - Real public source documents: 14
-- Example QA fixtures: 3 small schema examples only
-- Scaled QA expansion: upcoming in Batch 3
-- Benchmark runs and reports: future batches
+- Real evidence-linked QA examples: 92
+- QA split counts: 60 main evaluation, 15 hard, 17 refusal
+- Example QA fixtures: 3 small schema examples kept separate from real stats
+- Multi-config benchmark runs and reports: future batches
 - Clinical validation: none
 
 ## Intended Contents
@@ -47,8 +48,32 @@ type, and licensing/access note. These notes are cautious by design: verify
 source-specific reuse requirements before redistributing derived benchmark
 artifacts.
 
-The QA files remain examples only. They are not a scaled benchmark set and have
-not been clinically reviewed.
+The real QA files are evidence-linked benchmark-development examples. The
+`.example.jsonl` files remain schema examples only. None of the QA files have
+been clinically reviewed.
+
+## QA Coverage
+
+The current real QA files are:
+
+- `qa/qa_eval.jsonl`: 60 main evaluation examples
+- `qa/qa_hard.jsonl`: 15 harder examples, including multi-hop, comparison,
+  ambiguous, temporal, and contradiction-sensitive prompts
+- `qa/qa_refusal.jsonl`: 17 unsupported, out-of-scope, or patient-specific
+  refusal examples
+
+Categories represented include eligibility, deadlines, step-by-step process,
+benefits and services, restrictions and exclusions, location/contact,
+privacy/safety, clinical caution, multi-hop, ambiguous, unsupported,
+out-of-scope, contradiction-sensitive, and temporal/versioned examples.
+
+Each answerable QA example includes `gold_doc_ids` and `gold_evidence_spans`
+with exact `start_char` and `end_char` offsets into the source Markdown
+documents. Refusal examples do not require evidence spans, but they must set
+`requires_refusal` and `unsupported_reason`.
+
+These examples are for benchmark development. They are not medical advice,
+clinical labels, or clinician-reviewed annotations.
 
 ## Safety And Limitations
 

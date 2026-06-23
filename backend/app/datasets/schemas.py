@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field, HttpUrl, model_validator
+from pydantic import BaseModel, Field, HttpUrl, StrictBool, model_validator
 
 DatasetCategory = Literal[
     "eligibility",
@@ -61,7 +61,7 @@ class BenchmarkDocumentMetadata(BaseModel):
 
 class BenchmarkLabelMetadata(BaseModel):
     qa_id: str = Field(min_length=1)
-    reviewed: bool = False
+    reviewed: StrictBool = False
     reviewer_role: str | None = None
     notes: str | None = None
 
@@ -88,7 +88,7 @@ class BenchmarkQAExample(BaseModel):
     gold_evidence_spans: list[EvidenceSpan] = Field(default_factory=list)
     difficulty: Difficulty
     category: DatasetCategory
-    requires_refusal: bool = False
+    requires_refusal: StrictBool = False
     unsupported_reason: str | None = None
     notes: str | None = None
 
@@ -107,4 +107,3 @@ class BenchmarkQAExample(BaseModel):
             if not self.gold_evidence_spans:
                 raise ValueError("answerable examples must include at least one evidence span")
         return self
-

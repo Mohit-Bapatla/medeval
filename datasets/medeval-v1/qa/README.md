@@ -6,11 +6,24 @@ gold evidence spans or a refusal/unsupported reason.
 
 Recommended subsets:
 
+- `qa_eval.jsonl`: real main evaluation examples.
+- `qa_hard.jsonl`: real harder examples such as multi-hop, comparison,
+  temporal, ambiguous, or contradiction-sensitive questions.
+- `qa_refusal.jsonl`: real unsupported or out-of-scope examples that should
+  trigger refusal behavior.
 - `qa_eval.example.jsonl`: standard evidence-linked examples.
 - `qa_hard.example.jsonl`: harder examples such as multi-hop, comparison,
   temporal, ambiguous, or contradiction-sensitive questions.
 - `qa_refusal.example.jsonl`: unsupported or out-of-scope examples that should
   trigger refusal behavior.
 
-These files are examples only. They are not benchmark-grade labels.
+Current real QA count: 92 examples across 60 main evaluation, 15 hard, and 17
+refusal records. The `.example.jsonl` files remain schema examples and are not
+counted as real benchmark-development QA.
 
+Answerable examples must cite exact source text with character offsets into the
+Markdown source documents. Refusal examples must set `requires_refusal: true`
+and provide an `unsupported_reason`.
+
+These files are for benchmark development. They are not medical advice,
+clinically reviewed annotations, or completed benchmark results.

@@ -1,4 +1,5 @@
 import json
+import re
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -27,6 +28,25 @@ REQUIRED_DATASET_PATHS = [
     Path("metadata/taxonomy.yaml"),
 ]
 
+REAL_QA_FILES = [
+    Path("qa/qa_eval.jsonl"),
+    Path("qa/qa_hard.jsonl"),
+    Path("qa/qa_refusal.jsonl"),
+]
+
+EXAMPLE_QA_FILES = [
+    Path("qa/qa_eval.example.jsonl"),
+    Path("qa/qa_hard.example.jsonl"),
+    Path("qa/qa_refusal.example.jsonl"),
+]
+
+SENSITIVE_PLACEHOLDER_PATTERNS = [
+    re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
+    re.compile(r"\bMRN\s*[:#]", re.IGNORECASE),
+    re.compile(r"\bDOB\s*[:#]", re.IGNORECASE),
+    re.compile(r"\bmedical record number\b", re.IGNORECASE),
+]
+
 
 @dataclass(frozen=True)
 class DatasetValidationResult:
@@ -34,6 +54,8 @@ class DatasetValidationResult:
     documents: list[BenchmarkDocumentMetadata] = field(default_factory=list)
     example_documents: list[BenchmarkDocumentMetadata] = field(default_factory=list)
     qa_examples: list[BenchmarkQAExample] = field(default_factory=list)
+    example_qa_examples: list[BenchmarkQAExample] = field(default_factory=list)
+    qa_examples_by_split: dict[str, list[BenchmarkQAExample]] = field(default_factory=dict)
     labels: list[BenchmarkLabelMetadata] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -49,6 +71,9 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
     for required_path in REQUIRED_DATASET_PATHS:
         if not (root / required_path).exists():
             errors.append(f"Missing required path: {required_path}")
+    for required_path in REAL_QA_FILES:
+        if not (root / required_path).exists():
+            errors.append(f"Missing required QA split: {required_path}")
 
     taxonomy = _load_taxonomy(root / "metadata" / "taxonomy.yaml", errors)
     _validate_taxonomy(taxonomy, errors)
@@ -72,9 +97,16 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
         label="label metadata",
     )
 
+    qa_examples_by_split: dict[str, list[BenchmarkQAExample]] = {}
     qa_examples: list[BenchmarkQAExample] = []
-    for jsonl_path in sorted((root / "qa").glob("*.jsonl")):
-        qa_examples.extend(_load_qa_jsonl(jsonl_path, errors))
+    for split_path in REAL_QA_FILES:
+        split_examples = _load_qa_jsonl(root / split_path, errors)
+        qa_examples_by_split[split_path.name] = split_examples
+        qa_examples.extend(split_examples)
+
+    example_qa_examples: list[BenchmarkQAExample] = []
+    for split_path in EXAMPLE_QA_FILES:
+        example_qa_examples.extend(_load_qa_jsonl(root / split_path, errors))
 
     _validate_unique_doc_ids(documents, errors, label="docs.json")
     _validate_unique_doc_ids(example_documents, errors, label="docs.example.json")
@@ -87,29 +119,32 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
             f"{', '.join(overlapping_doc_ids)}"
         )
 
-    doc_ids = real_doc_ids | example_doc_ids
+    real_document_texts = _load_document_texts(root, documents, errors)
+    example_document_texts = _load_document_texts(root, example_documents, errors)
     for document in [*documents, *example_documents]:
         if not (root / document.document_path).exists():
             errors.append(
                 f"{document.doc_id}: document_path does not exist: {document.document_path}"
             )
 
-    qa_ids = set()
-    for example in qa_examples:
-        if example.qa_id in qa_ids:
-            errors.append(f"{example.qa_id}: duplicate qa_id")
-        qa_ids.add(example.qa_id)
-        missing_doc_ids = sorted(set(example.gold_doc_ids) - doc_ids)
-        if missing_doc_ids:
-            errors.append(f"{example.qa_id}: unknown gold_doc_ids: {', '.join(missing_doc_ids)}")
-        for span in example.gold_evidence_spans:
-            if span.doc_id not in doc_ids:
-                errors.append(
-                    f"{example.qa_id}: evidence span references unknown doc_id {span.doc_id}"
-                )
+    _validate_qa_examples(
+        qa_examples,
+        real_doc_ids,
+        real_document_texts,
+        errors,
+        label="real QA",
+    )
+    _validate_qa_examples(
+        example_qa_examples,
+        example_doc_ids,
+        example_document_texts,
+        errors,
+        label="example QA",
+    )
 
     label_ids = [label.qa_id for label in labels]
-    unknown_label_ids = sorted(set(label_ids) - qa_ids)
+    example_qa_ids = {example.qa_id for example in example_qa_examples}
+    unknown_label_ids = sorted(set(label_ids) - example_qa_ids)
     if unknown_label_ids:
         errors.append(
             "labels.example.json references unknown qa_id values: "
@@ -121,6 +156,8 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
         documents=documents,
         example_documents=example_documents,
         qa_examples=qa_examples,
+        example_qa_examples=example_qa_examples,
+        qa_examples_by_split=qa_examples_by_split,
         labels=labels,
         errors=errors,
     )
@@ -133,6 +170,10 @@ def dataset_statistics(dataset_path: Path) -> dict[str, Any]:
     answer_types = Counter(example.answer_type for example in result.qa_examples)
     source_types = Counter(document.source_type for document in result.documents)
     refusal_count = sum(1 for example in result.qa_examples if example.requires_refusal)
+    qa_count_by_split = {
+        split_name: len(examples)
+        for split_name, examples in sorted(result.qa_examples_by_split.items())
+    }
 
     return {
         "dataset_path": str(result.dataset_path),
@@ -141,9 +182,14 @@ def dataset_statistics(dataset_path: Path) -> dict[str, Any]:
         "document_count": len(result.documents),
         "example_document_count": len(result.example_documents),
         "qa_count": len(result.qa_examples),
+        "example_qa_count": len(result.example_qa_examples),
+        "qa_count_by_split": qa_count_by_split,
         "label_count": len(result.labels),
         "refusal_count": refusal_count,
         "answerable_count": len(result.qa_examples) - refusal_count,
+        "qa_count_by_category": dict(sorted(categories.items())),
+        "qa_count_by_difficulty": dict(sorted(difficulties.items())),
+        "qa_count_by_answer_type": dict(sorted(answer_types.items())),
         "categories": dict(sorted(categories.items())),
         "difficulties": dict(sorted(difficulties.items())),
         "answer_types": dict(sorted(answer_types.items())),
@@ -158,6 +204,71 @@ def _validate_unique_doc_ids(
     duplicates = sorted(doc_id for doc_id, count in counts.items() if count > 1)
     if duplicates:
         errors.append(f"{label}: duplicate doc_id values: {', '.join(duplicates)}")
+
+
+def _load_document_texts(
+    root: Path, documents: list[BenchmarkDocumentMetadata], errors: list[str]
+) -> dict[str, str]:
+    texts: dict[str, str] = {}
+    for document in documents:
+        document_path = root / document.document_path
+        if not document_path.exists():
+            continue
+        texts[document.doc_id] = document_path.read_text(encoding="utf-8")
+    return texts
+
+
+def _validate_qa_examples(
+    examples: list[BenchmarkQAExample],
+    doc_ids: set[str],
+    document_texts: dict[str, str],
+    errors: list[str],
+    label: str,
+) -> None:
+    qa_id_counts = Counter(example.qa_id for example in examples)
+    duplicate_qa_ids = sorted(qa_id for qa_id, count in qa_id_counts.items() if count > 1)
+    if duplicate_qa_ids:
+        errors.append(f"{label}: duplicate qa_id values: {', '.join(duplicate_qa_ids)}")
+
+    for example in examples:
+        _validate_no_sensitive_placeholders(example, errors)
+        missing_doc_ids = sorted(set(example.gold_doc_ids) - doc_ids)
+        if missing_doc_ids:
+            errors.append(f"{example.qa_id}: unknown gold_doc_ids: {', '.join(missing_doc_ids)}")
+        for span in example.gold_evidence_spans:
+            if span.doc_id not in doc_ids:
+                errors.append(
+                    f"{example.qa_id}: evidence span references unknown doc_id {span.doc_id}"
+                )
+                continue
+            document_text = document_texts.get(span.doc_id, "")
+            if span.text not in document_text:
+                errors.append(
+                    f"{example.qa_id}: evidence text does not appear in document {span.doc_id}"
+                )
+                continue
+            expected_text = document_text[span.start_char : span.end_char]
+            if expected_text != span.text:
+                errors.append(
+                    f"{example.qa_id}: evidence offsets do not match text for document "
+                    f"{span.doc_id}"
+                )
+
+
+def _validate_no_sensitive_placeholders(
+    example: BenchmarkQAExample, errors: list[str]
+) -> None:
+    values = [
+        example.question,
+        example.expected_answer,
+        example.notes or "",
+        *(span.text for span in example.gold_evidence_spans),
+    ]
+    for value in values:
+        for pattern in SENSITIVE_PLACEHOLDER_PATTERNS:
+            if pattern.search(value):
+                errors.append(f"{example.qa_id}: possible sensitive placeholder matched")
+                return
 
 
 def _load_taxonomy(path: Path, errors: list[str]) -> dict[str, Any]:
