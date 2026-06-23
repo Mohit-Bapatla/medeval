@@ -6,7 +6,7 @@ MedEval v1 is currently an in-development dataset scaffold with a small seed set
 of real public healthcare source documents. It is not a completed benchmark and
 does not contain validated benchmark results.
 
-Current Batch 4 contents:
+Current Batch 5 contents:
 
 - 14 concise public-document seed files
 - source metadata in `datasets/medeval-v1/metadata/docs.json`
@@ -14,6 +14,7 @@ Current Batch 4 contents:
 - 92 real evidence-linked QA examples
 - 3 small QA example fixtures kept separate from real dataset stats
 - deterministic local baseline config and seed command support
+- deterministic local comparison configs and `compare-runs` reporting
 - no clinical validation
 
 ## Intended Use
@@ -46,8 +47,9 @@ requirements should be checked again before any redistributed release artifact.
 The real QA examples now cover direct extraction, lists, eligibility,
 restrictions, timing, clinical caution, privacy/safety, Medicare/CMS policy,
 drug safety, clinical trial eligibility, multi-hop/comparison questions,
-ambiguous prompts, and unsupported/refusal behavior. Multi-config benchmark
-runs and reproducible benchmark reports are future batches.
+ambiguous prompts, and unsupported/refusal behavior. Deterministic local
+comparison reports can compare config variants for debugging and regression
+testing. External-provider benchmark runs are future batches.
 
 Current real QA split counts:
 
@@ -108,3 +110,19 @@ Then export local deterministic reports with `medeval export-report` and
 The deterministic baseline is an in-development public healthcare seed run. It
 does not use external model APIs and does not establish clinical validation,
 medical advice quality, production readiness, or benchmark completeness.
+
+## Multi-Config Deterministic Comparisons
+
+The repository includes deterministic config variants for top-k retrieval,
+cleaned retrieved context, and a metadata-assisted refusal control. Compare
+completed runs with:
+
+```bash
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <variant-id> --format markdown --out ../reports/medeval_v1_comparison_report.md
+```
+
+JSON and CSV comparison exports are also supported. These comparisons are
+debugging/regression artifacts for an in-development public healthcare seed
+dataset. The refusal-aware variant is explicitly metadata-assisted and should be
+interpreted as a deterministic control, not a real model capability or validated
+leaderboard result.

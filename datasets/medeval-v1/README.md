@@ -5,14 +5,15 @@ dataset scaffold plus a small seed set of real public healthcare source
 documents. It is not a completed benchmark, validated clinical dataset, or
 source of benchmark results.
 
-Current Batch 4 status:
+Current Batch 5 status:
 
 - Real public source documents: 14
 - Real evidence-linked QA examples: 92
 - QA split counts: 60 main evaluation, 15 hard, 17 refusal
 - Example QA fixtures: 3 small schema examples kept separate from real stats
 - Deterministic local baseline config: available
-- Multi-config benchmark runs and provider comparisons: future batches
+- Multi-config deterministic comparison configs: available
+- External provider comparisons: future batches
 - Clinical validation: none
 
 ## Intended Contents
@@ -127,3 +128,29 @@ medeval export-results --experiment-id <experiment-id> --format csv --out ../rep
 These reports are local deterministic baseline artifacts for an in-development
 public healthcare seed dataset. They are not clinically validated, not medical
 advice, and not benchmark-complete results.
+
+## Multi-Config Deterministic Comparisons
+
+After seeding the dataset, run several deterministic variants:
+
+```bash
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top3.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top8.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_refusal_aware.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_clean_context.yaml
+```
+
+Then compare completed experiment IDs:
+
+```bash
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --experiment-id <top8-id> --format markdown --out ../reports/medeval_v1_comparison_report.md
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format json --out ../reports/medeval_v1_comparison_report.json
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
+```
+
+The clean-context variant removes YAML frontmatter and source metadata lines
+from retrieved context before deterministic answer generation. The
+refusal-aware variant is a metadata-assisted deterministic refusal control that
+uses QA `requires_refusal` metadata. These variants are debugging/regression
+controls, not real model leaderboard claims.

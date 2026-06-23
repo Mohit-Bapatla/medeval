@@ -58,6 +58,63 @@ class ReportExportService:
         report["markdown"] = self.markdown(report)
         return report
 
+    def build_comparison_report(
+        self, db: Session, experiment_ids: list[uuid.UUID]
+    ) -> dict[str, Any]:
+        if len(experiment_ids) < 2:
+            raise ValueError("At least two experiment IDs are required for comparison")
+
+        generated_at = datetime.now(UTC)
+        summaries = []
+        baseline_metrics: dict[str, float | None] | None = None
+        for index, experiment_id in enumerate(experiment_ids):
+            experiment = db.get(Experiment, experiment_id)
+            if experiment is None:
+                raise ValueError(f"Experiment not found: {experiment_id}")
+            if experiment.status != "completed":
+                raise ValueError(
+                    f"Experiment {experiment_id} has status '{experiment.status}', "
+                    "but compare-runs requires completed experiments"
+                )
+            aggregate = experiment_service.aggregate_results(db, experiment_id)
+            metrics = self._comparison_metrics(aggregate)
+            if index == 0:
+                baseline_metrics = metrics
+            summaries.append(
+                {
+                    "experiment_id": str(experiment.id),
+                    "experiment_id_short": str(experiment.id)[:8],
+                    "name": experiment.name,
+                    "status": experiment.status,
+                    "model_provider": experiment.model_provider,
+                    "model_name": experiment.model_name,
+                    "top_k": experiment.top_k,
+                    "metadata": experiment.metadata_json,
+                    "metrics": metrics,
+                    "deltas_vs_baseline": self._metric_deltas(metrics, baseline_metrics or {}),
+                    "failure_type_counts": aggregate.failure_type_counts,
+                }
+            )
+
+        report = {
+            "metadata": {
+                "report_type": "deterministic_experiment_comparison",
+                "generated_at": generated_at,
+                "baseline_experiment_id": str(experiment_ids[0]),
+                "experiment_count": len(summaries),
+                "disclaimer": DISCLAIMER,
+                "limitations": [
+                    "This comparison is for deterministic local debugging and regression testing.",
+                    "Metrics are computed from local database state and heuristic evaluators.",
+                    "This is not clinical validation, medical advice, or a validated leaderboard.",
+                ],
+            },
+            "experiments": summaries,
+            "disclaimer": DISCLAIMER,
+        }
+        report["markdown"] = self.comparison_markdown(report)
+        return report
+
     def response_rows(self, db: Session, experiment_id: uuid.UUID) -> list[dict[str, Any]]:
         responses = (
             db.execute(
@@ -243,6 +300,176 @@ class ReportExportService:
             writer.writerow(serializable)
         return output.getvalue()
 
+    def comparison_csv(self, report: dict[str, Any]) -> str:
+        output = io.StringIO()
+        fieldnames = [
+            "experiment_id",
+            "experiment_id_short",
+            "name",
+            "status",
+            "model_provider",
+            "model_name",
+            "top_k",
+            "examples",
+            "avg_correctness",
+            "avg_groundedness",
+            "citation_precision",
+            "citation_recall",
+            "retrieval_precision",
+            "retrieval_recall",
+            "refusal_accuracy",
+            "hallucination_rate",
+            "avg_latency_ms",
+            "total_estimated_cost",
+            "correctness_delta",
+            "groundedness_delta",
+            "citation_recall_delta",
+            "retrieval_recall_delta",
+            "refusal_accuracy_delta",
+            "hallucination_rate_delta",
+            "failure_type_counts",
+        ]
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for experiment in report["experiments"]:
+            metrics = experiment["metrics"]
+            deltas = experiment["deltas_vs_baseline"]
+            writer.writerow(
+                {
+                    "experiment_id": experiment["experiment_id"],
+                    "experiment_id_short": experiment["experiment_id_short"],
+                    "name": experiment["name"],
+                    "status": experiment["status"],
+                    "model_provider": experiment["model_provider"],
+                    "model_name": experiment["model_name"],
+                    "top_k": experiment["top_k"],
+                    "examples": metrics["examples"],
+                    "avg_correctness": metrics["avg_correctness"],
+                    "avg_groundedness": metrics["avg_groundedness"],
+                    "citation_precision": metrics["citation_precision"],
+                    "citation_recall": metrics["citation_recall"],
+                    "retrieval_precision": metrics["retrieval_precision"],
+                    "retrieval_recall": metrics["retrieval_recall"],
+                    "refusal_accuracy": metrics["refusal_accuracy"],
+                    "hallucination_rate": metrics["hallucination_rate"],
+                    "avg_latency_ms": metrics["avg_latency_ms"],
+                    "total_estimated_cost": metrics["total_estimated_cost"],
+                    "correctness_delta": deltas["avg_correctness_delta"],
+                    "groundedness_delta": deltas["avg_groundedness_delta"],
+                    "citation_recall_delta": deltas["citation_recall_delta"],
+                    "retrieval_recall_delta": deltas["retrieval_recall_delta"],
+                    "refusal_accuracy_delta": deltas["refusal_accuracy_delta"],
+                    "hallucination_rate_delta": deltas["hallucination_rate_delta"],
+                    "failure_type_counts": ";".join(
+                        f"{key}:{value}"
+                        for key, value in sorted(experiment["failure_type_counts"].items())
+                    ),
+                }
+            )
+        return output.getvalue()
+
+    def comparison_markdown(self, report: dict[str, Any]) -> str:
+        metadata = report["metadata"]
+        lines = [
+            "# MedEval v1 Deterministic Comparison Report",
+            "",
+            f"Generated: {metadata['generated_at'].isoformat()}",
+            "",
+            "## Disclaimer",
+            "",
+            report["disclaimer"],
+            "",
+            "This comparison is a deterministic local debugging/regression workflow for "
+            "an in-development public healthcare seed dataset. It is not clinical "
+            "validation, medical advice, or a validated leaderboard.",
+            "",
+            "## Compared Experiments",
+            "",
+            "| Experiment | ID | Status | Model | top_k | Examples |",
+            "| --- | --- | --- | --- | ---: | ---: |",
+        ]
+        for experiment in report["experiments"]:
+            metrics = experiment["metrics"]
+            lines.append(
+                f"| {experiment['name']} | {experiment['experiment_id_short']} | "
+                f"{experiment['status']} | {experiment['model_name']} | "
+                f"{experiment['top_k']} | {metrics['examples']} |"
+            )
+
+        lines.extend(
+            [
+                "",
+                "## Aggregate Metrics",
+                "",
+                "| Experiment | Correctness | Groundedness | Citation Precision | "
+                "Citation Recall | Retrieval Precision | Retrieval Recall | "
+                "Refusal Accuracy | Hallucination Rate | Avg Latency | Cost |",
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for experiment in report["experiments"]:
+            metrics = experiment["metrics"]
+            lines.append(
+                f"| {experiment['name']} | {self._format_metric(metrics['avg_correctness'])} | "
+                f"{self._format_metric(metrics['avg_groundedness'])} | "
+                f"{self._format_metric(metrics['citation_precision'])} | "
+                f"{self._format_metric(metrics['citation_recall'])} | "
+                f"{self._format_metric(metrics['retrieval_precision'])} | "
+                f"{self._format_metric(metrics['retrieval_recall'])} | "
+                f"{self._format_metric(metrics['refusal_accuracy'])} | "
+                f"{self._format_metric(metrics['hallucination_rate'])} | "
+                f"{self._format_metric(metrics['avg_latency_ms'])} | "
+                f"{self._format_metric(metrics['total_estimated_cost'])} |"
+            )
+
+        lines.extend(
+            [
+                "",
+                "## Deltas Vs Baseline",
+                "",
+                "| Experiment | Correctness Δ | Groundedness Δ | Citation Recall Δ | "
+                "Retrieval Recall Δ | Refusal Accuracy Δ | Hallucination Rate Δ |",
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for experiment in report["experiments"]:
+            deltas = experiment["deltas_vs_baseline"]
+            lines.append(
+                f"| {experiment['name']} | "
+                f"{self._format_delta(deltas['avg_correctness_delta'])} | "
+                f"{self._format_delta(deltas['avg_groundedness_delta'])} | "
+                f"{self._format_delta(deltas['citation_recall_delta'])} | "
+                f"{self._format_delta(deltas['retrieval_recall_delta'])} | "
+                f"{self._format_delta(deltas['refusal_accuracy_delta'])} | "
+                f"{self._format_delta(deltas['hallucination_rate_delta'])} |"
+            )
+
+        lines.extend(["", "## Failure Type Counts", ""])
+        for experiment in report["experiments"]:
+            lines.extend([f"### {experiment['name']}", ""])
+            counts = experiment["failure_type_counts"]
+            if counts:
+                lines.extend(f"- {key}: {value}" for key, value in sorted(counts.items()))
+            else:
+                lines.append("- No failure counts available.")
+            lines.append("")
+
+        lines.extend(
+            [
+                "## Notes And Limitations",
+                "",
+                "- Deterministic local comparisons are useful for pipeline debugging and "
+                "regression testing.",
+                "- Refusal-aware variants may use QA metadata as a deterministic control, "
+                "not as a real model capability.",
+                "- Clean-context variants strip frontmatter and source metadata before "
+                "deterministic answer generation.",
+                "- These reports do not claim real-world performance, clinical validation, "
+                "production readiness, or external adoption.",
+            ]
+        )
+        return "\n".join(lines)
+
     @staticmethod
     def _latest_evaluation(response: ModelResponse) -> EvaluationResult | None:
         if not response.evaluation_results:
@@ -292,6 +519,53 @@ class ReportExportService:
         if isinstance(value, int | float):
             return f"{value:.3f}"
         return str(value)
+
+    @staticmethod
+    def _format_delta(value: object) -> str:
+        if value is None:
+            return "n/a"
+        if isinstance(value, int | float):
+            return f"{value:+.3f}"
+        return str(value)
+
+    @staticmethod
+    def _comparison_metrics(results) -> dict[str, float | int | None]:
+        return {
+            "examples": results.example_count,
+            "avg_correctness": results.avg_correctness,
+            "avg_groundedness": results.avg_groundedness,
+            "citation_precision": results.avg_citation_precision,
+            "citation_recall": results.avg_citation_recall,
+            "retrieval_precision": results.avg_retrieval_precision,
+            "retrieval_recall": results.avg_retrieval_recall,
+            "refusal_accuracy": results.refusal_accuracy,
+            "hallucination_rate": results.hallucination_rate,
+            "avg_latency_ms": results.avg_latency_ms,
+            "total_estimated_cost": results.total_estimated_cost,
+        }
+
+    @staticmethod
+    def _metric_deltas(
+        metrics: dict[str, float | int | None],
+        baseline: dict[str, float | int | None],
+    ) -> dict[str, float | None]:
+        pairs = {
+            "avg_correctness_delta": "avg_correctness",
+            "avg_groundedness_delta": "avg_groundedness",
+            "citation_recall_delta": "citation_recall",
+            "retrieval_recall_delta": "retrieval_recall",
+            "refusal_accuracy_delta": "refusal_accuracy",
+            "hallucination_rate_delta": "hallucination_rate",
+        }
+        deltas: dict[str, float | None] = {}
+        for output_key, metric_key in pairs.items():
+            value = metrics.get(metric_key)
+            baseline_value = baseline.get(metric_key)
+            if value is None or baseline_value is None:
+                deltas[output_key] = None
+            else:
+                deltas[output_key] = float(value) - float(baseline_value)
+        return deltas
 
 
 report_export_service = ReportExportService()

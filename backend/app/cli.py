@@ -322,6 +322,47 @@ def export_results(
     typer.echo(f"Wrote CSV results to {out}")
 
 
+@app.command("compare-runs")
+def compare_runs(
+    experiment_id: Annotated[
+        list[str],
+        typer.Option(
+            "--experiment-id",
+            help="Completed experiment UUID. Pass this option multiple times.",
+        ),
+    ],
+    format: Annotated[
+        str,
+        typer.Option(help="Comparison format: markdown, json, or csv."),
+    ] = "markdown",
+    out: Annotated[
+        Path,
+        typer.Option(help="Output file path."),
+    ] = Path("../reports/medeval_v1_comparison_report.md"),
+) -> None:
+    """Compare completed deterministic experiment runs."""
+    if len(experiment_id) < 2:
+        raise typer.BadParameter("Provide at least two --experiment-id values")
+    experiment_ids = [_parse_uuid(value) for value in experiment_id]
+    with SessionLocal() as db:
+        try:
+            comparison = report_export_service.build_comparison_report(db, experiment_ids)
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if format == "markdown":
+        out.write_text(comparison["markdown"], encoding="utf-8")
+    elif format == "json":
+        out.write_text(_json_report(comparison), encoding="utf-8")
+    elif format == "csv":
+        out.write_text(report_export_service.comparison_csv(comparison), encoding="utf-8")
+    else:
+        raise typer.BadParameter("format must be markdown, json, or csv")
+    typer.echo(f"Wrote {format} comparison report to {out}")
+
+
 def _document_type_for_path(path: Path) -> str:
     name = path.stem
     if "hipaa" in name:
