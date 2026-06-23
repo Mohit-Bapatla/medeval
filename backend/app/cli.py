@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, select, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
+from app.datasets.validation import dataset_statistics, validate_dataset
 from app.db import base as _base  # noqa: F401
 from app.db.session import SessionLocal
 from app.models.dataset import Dataset
@@ -48,6 +49,49 @@ def status() -> None:
     except SQLAlchemyError as exc:
         typer.echo(f"Database: unreachable ({exc.__class__.__name__})")
         typer.echo("Start Postgres with `docker compose up -d db` before seeding or running.")
+
+
+@app.command("validate-dataset")
+def validate_dataset_command(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Filesystem path to a MedEval benchmark dataset directory.",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+        ),
+    ],
+) -> None:
+    """Validate a filesystem benchmark dataset fixture without using the database."""
+    result = validate_dataset(path)
+    if result.ok:
+        typer.echo(
+            f"Dataset valid: {result.dataset_path} "
+            f"({len(result.documents)} docs, {len(result.qa_examples)} QA examples)"
+        )
+        return
+
+    typer.echo(f"Dataset invalid: {result.dataset_path}")
+    for error in result.errors:
+        typer.echo(f"- {error}")
+    raise typer.Exit(code=1)
+
+
+@app.command("dataset-stats")
+def dataset_stats_command(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Filesystem path to a MedEval benchmark dataset directory.",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+        ),
+    ],
+) -> None:
+    """Print lightweight filesystem dataset counts and taxonomy distributions."""
+    typer.echo(_json_report(dataset_statistics(path)))
 
 
 @app.command("seed-docs")

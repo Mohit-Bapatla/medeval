@@ -1,0 +1,15 @@
+[
+  {
+    "doc_id": "example_public_health_doc_001",
+    "title": "Example Public Health Document Placeholder",
+    "publisher": "Example Public Agency",
+    "source_type": "public_health_guidance",
+    "source_url": "https://example.gov/source",
+    "accessed_at": "2026-06-23",
+    "license_notes": "Example placeholder; replace with reviewed public-source license notes.",
+    "domain": "preventive_health",
+    "difficulty": "medium",
+    "document_path": "documents/example_public_health_doc_001.md"
+  }
+]
+
