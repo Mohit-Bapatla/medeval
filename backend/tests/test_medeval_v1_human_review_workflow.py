@@ -74,6 +74,15 @@ def test_api_save_review_and_summary_calibration(client: TestClient) -> None:
     assert saved.json()["metadata"]["sample"] is True
     assert saved.json()["metadata"]["review_schema"] == "medeval_v1_manual_review"
 
+    queue = client.get(f"/api/v1/human-reviews/queue?experiment_id={experiment_id}")
+    assert queue.status_code == 200
+    queue_item = queue.json()["items"][0]
+    assert queue_item["manual_review"]["review_status"] == "completed"
+    assert queue_item["manual_review"]["sample"] is True
+    assert queue_item["manual_review"]["selected_failure_categories"] == [
+        "incomplete_answer"
+    ]
+
     summary = client.get(f"/api/v1/human-reviews/summary?experiment_id={experiment_id}")
     assert summary.status_code == 200
     payload = summary.json()

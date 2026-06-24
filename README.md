@@ -80,6 +80,7 @@ MedEval provides a reproducible evaluation loop:
 - Failure taxonomy for retrieval, citation, refusal, and generation issues
 - Retrieval-vs-generation failure separation
 - Human review records for response-level review workflows
+- Human review dashboard for manual calibration against automated diagnostics
 - YAML experiment configs
 - Typer CLI for seeding, running experiments, and exporting reports
 - Next.js dashboard
@@ -250,6 +251,7 @@ labeled synthetic deterministic sample outputs.
 - **Experiments**: run configs, status, aggregate metrics, and response tables.
 - **Trace Viewer**: question, gold answer, model answer, retrieved chunks, cited chunks, scores, claim support, failure metadata, and raw output.
 - **Failure Analysis**: failure type counts, hallucination flags, failed refusals, retrieval misses, and links to traces.
+- **Human Review**: manual review queue, response evidence, reviewer rubric form, and calibration summaries against automated diagnostics.
 - **Reports**: Markdown/JSON report previews and CSV-friendly per-response exports.
 
 ## Report Exports

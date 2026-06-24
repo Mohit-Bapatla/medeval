@@ -329,7 +329,44 @@ class HumanReviewService:
             "automated_scores": self._automated_scores(evaluation),
             "legacy_failure_type": evaluation.failure_type if evaluation else None,
             "rich_failure_taxonomy": taxonomy,
+            "manual_review": self._manual_review_snapshot(response),
             "review_template": self._blank_review_template(),
+        }
+
+    def _manual_review_snapshot(self, response: ModelResponse) -> dict[str, Any] | None:
+        reviews = [
+            review
+            for review in response.human_reviews
+            if self._review_metadata(review).get("review_schema")
+            == "medeval_v1_manual_review"
+        ]
+        if not reviews:
+            return None
+        review = sorted(
+            reviews,
+            key=lambda item: (item.updated_at, item.created_at),
+            reverse=True,
+        )[0]
+        metadata = self._review_metadata(review)
+        return {
+            "review_id": str(review.id),
+            "reviewer_label": metadata.get("reviewer_label"),
+            "reviewer_type": metadata.get("reviewer_type"),
+            "review_status": metadata.get("review_status"),
+            "answer_correctness": metadata.get("answer_correctness"),
+            "groundedness": metadata.get("groundedness"),
+            "citation_quality": metadata.get("citation_quality"),
+            "refusal_safety": metadata.get("refusal_safety"),
+            "should_refuse": metadata.get("should_refuse"),
+            "did_refuse": metadata.get("did_refuse"),
+            "selected_failure_categories": metadata.get("selected_failure_categories", []),
+            "severity_override": metadata.get("severity_override"),
+            "review_notes": metadata.get("review_notes"),
+            "confidence": metadata.get("confidence"),
+            "reviewer_time_seconds": metadata.get("reviewer_time_seconds"),
+            "adjudication_status": metadata.get("adjudication_status"),
+            "sample": metadata.get("sample", False),
+            "sample_notes": metadata.get("sample_notes"),
         }
 
     def _blank_review_template(self) -> dict[str, Any]:

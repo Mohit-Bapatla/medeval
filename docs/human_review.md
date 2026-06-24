@@ -62,6 +62,25 @@ The queue includes experiment metadata, question, gold answer, generated answer,
 retrieved/cited chunks, automated scores, legacy failure type, rich failure
 taxonomy diagnostics, and a blank review template.
 
+## Dashboard Review Panel
+
+The Next.js dashboard includes a lightweight `/human-review` route for manual
+review workflow triage. It uses the Batch 9 API endpoints:
+
+- `GET /api/v1/human-reviews/queue?experiment_id=...`
+- `GET /api/v1/human-reviews/summary?experiment_id=...`
+- `GET /api/v1/human-reviews/responses/{response_id}/detail`
+- `PUT /api/v1/human-reviews/responses/{response_id}`
+
+The panel lets a reviewer select an experiment, filter the review queue by
+status, severity, safety relevance, or search text, inspect gold answers,
+generated answers, retrieved/cited chunks, automated scores, and rich failure
+taxonomy diagnostics, then save a review record with the MedEval v1 rubric.
+
+The UI is a workflow surface only. It does not imply clinical validation,
+medical advice, independent clinician review, completed benchmark status, or
+external adoption. Sample fixture records remain sample workflow artifacts.
+
 ## Import Reviews
 
 Import completed review records:
