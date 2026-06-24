@@ -164,6 +164,15 @@ These artifacts use deterministic local providers only. They are not clinically
 validated, not medical advice, not a completed benchmark, and not a real model
 leaderboard.
 
+Reproduce or check the MedEval v1 deterministic artifact loop with:
+
+```bash
+make medeval-v1-smoke
+make medeval-v1-check-reports
+```
+
+See [docs/reproducibility.md](docs/reproducibility.md).
+
 ## Quickstart
 
 PowerShell on Windows:

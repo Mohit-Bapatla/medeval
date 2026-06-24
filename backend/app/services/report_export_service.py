@@ -339,6 +339,7 @@ class ReportExportService:
             "question",
             "expected_answerability",
             "model_answerability",
+            "answer_text",
             "correctness_score",
             "groundedness_score",
             "citation_precision",

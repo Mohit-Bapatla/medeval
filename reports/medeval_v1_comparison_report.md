@@ -1,6 +1,6 @@
 # MedEval v1 Deterministic Comparison Report
 
-Generated: 2026-06-24T01:27:13.764175+00:00
+Generated: 2026-06-24T01:55:32.440768+00:00
 
 ## Disclaimer
 
@@ -12,10 +12,10 @@ This comparison is a deterministic local debugging/regression workflow for an in
 
 | Experiment | ID | Status | Model | top_k | Examples |
 | --- | --- | --- | --- | ---: | ---: |
-| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 3efd07a5 | completed | deterministic-extractive-answer-v1 | 5 | 92 |
-| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 8e268664 | completed | deterministic-extractive-answer-v1-clean-context | 5 | 92 |
-| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 4ea998c7 | completed | deterministic-extractive-answer-v1-refusal-oracle | 5 | 92 |
-| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | bd6af212 | completed | deterministic-extractive-answer-v1-clean-refusal-oracle | 5 | 92 |
+| MedEval v1 Public Healthcare Seed - Deterministic Baseline | cb5c7d8d | completed | deterministic-extractive-answer-v1 | 5 | 92 |
+| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | a0145407 | completed | deterministic-extractive-answer-v1-clean-context | 5 | 92 |
+| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 356916bc | completed | deterministic-extractive-answer-v1-refusal-oracle | 5 | 92 |
+| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | af1415ef | completed | deterministic-extractive-answer-v1-clean-refusal-oracle | 5 | 92 |
 
 ## Aggregate Metrics
 
@@ -24,7 +24,7 @@ This comparison is a deterministic local debugging/regression workflow for an in
 | MedEval v1 Public Healthcare Seed - Deterministic Baseline | 0.292 | 0.989 | 0.800 | 0.907 | 0.180 | 0.976 | 0.870 | 0.130 | 0.000 | 0.000 |
 | MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 0.337 | 0.989 | 0.810 | 0.900 | 0.180 | 0.976 | 0.880 | 0.120 | 0.000 | 0.000 |
 | MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 0.412 | 0.804 | 0.919 | 0.907 | 0.180 | 0.976 | 0.989 | 0.196 | 0.011 | 0.000 |
-| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 0.446 | 0.804 | 0.919 | 0.900 | 0.180 | 0.976 | 0.989 | 0.196 | 0.022 | 0.000 |
+| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 0.446 | 0.804 | 0.919 | 0.900 | 0.180 | 0.976 | 0.989 | 0.196 | 0.011 | 0.000 |
 
 ## Deltas Vs Baseline
 

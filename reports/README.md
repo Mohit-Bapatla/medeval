@@ -32,6 +32,20 @@ leaderboard, or an external adoption claim.
 
 ## Reproduce The Artifacts
 
+The shortest path is:
+
+```bash
+make medeval-v1-smoke
+```
+
+To validate the currently checked-in artifacts without regenerating them:
+
+```bash
+make medeval-v1-check-reports
+```
+
+See `docs/reproducibility.md` for details.
+
 From the repository root:
 
 ```bash

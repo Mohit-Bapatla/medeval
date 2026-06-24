@@ -75,6 +75,8 @@ heuristic local debugging signals, not clinical adjudication.
 Current deterministic MedEval v1 seed artifacts are committed under `reports/`.
 They cover 14 public healthcare documents, 92 evidence-linked QA examples, and
 the four-config deterministic comparison shown above.
+Use `make medeval-v1-smoke` to regenerate them locally, or
+`make medeval-v1-check-reports` to validate the committed artifact structure.
 
 These comparisons are local deterministic debugging artifacts. They are not
 clinical validation, medical advice, production readiness evidence, or a
