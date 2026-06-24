@@ -66,6 +66,11 @@ medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --f
 medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
 ```
 
+Comparison exports include aggregate metrics, deltas versus the baseline run,
+legacy `failure_type` counts, rich failure category counts, stage counts,
+severity counts, and safety-relevant failure counts. These diagnostics are
+heuristic local debugging signals, not clinical adjudication.
+
 These comparisons are local deterministic debugging artifacts. They are not
 clinical validation, medical advice, production readiness evidence, or a
 validated model leaderboard.

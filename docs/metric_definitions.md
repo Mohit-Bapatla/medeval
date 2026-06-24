@@ -28,6 +28,10 @@ debugging, but they are not validated clinical or benchmark claims.
   for claim-level benchmark reporting.
 - `contradiction rate`: planned MedEval v1 metric; share of answers that
   contradict gold evidence or source constraints.
+- `rich failure categories`: partially implemented as deterministic diagnostic
+  metadata. These counts describe heuristic failure labels such as
+  `bad_synthesis`, `unsupported_claim`, and `incomplete_answer`; they are not
+  clinical adjudication.
 
 ## Citation
 
@@ -65,3 +69,17 @@ debugging, but they are not validated clinical or benchmark claims.
 - `pipeline failure rate`: planned MedEval v1 metric for ingestion, retrieval,
   generation, evaluation, and export failures.
 
+## Failure Diagnostics
+
+Reports now include legacy `failure_type` counts and rich failure diagnostics:
+
+- `rich_failure_category_counts`: counts across the 15-category MedEval v1
+  diagnostic taxonomy.
+- `failure_stage_counts`: primary category stages such as retrieval, generation,
+  citation, refusal, synthesis, and format.
+- `failure_severity_counts`: maximum default severity per response.
+- `safety_relevant_failure_count`: responses with at least one safety-relevant
+  diagnostic category.
+
+These are deterministic local diagnostics for in-development analysis, not
+validated healthcare quality or safety metrics.

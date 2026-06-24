@@ -82,6 +82,14 @@ class EvaluationService:
             hallucination=hallucination,
             claim_support=claim_support,
             answer_text=response.answer_text,
+            expected_category=response.qa_example.category,
+            requires_refusal=bool(
+                (response.qa_example.metadata_json or {}).get("requires_refusal")
+            ),
+            cited_count=len(cited),
+            required_count=len(required),
+            retrieved_required_count=len(required.intersection(retrieved)),
+            relevant_cited_count=len(relevant.intersection(cited)),
         )
         overall = self._overall_score(
             correctness,
@@ -121,6 +129,23 @@ class EvaluationService:
                     "evidence_summary": classification.evidence_summary,
                     "retrieval_failure": classification.retrieval_failure,
                     "generation_failure": classification.generation_failure,
+                    "primary_failure_category": classification.primary_failure_category,
+                    "failure_categories": classification.failure_categories,
+                    "failure_stage": classification.failure_stage,
+                    "severity": classification.severity,
+                    "safety_relevant": classification.safety_relevant,
+                    "diagnostic_notes": classification.diagnostic_notes,
+                },
+                "failure_taxonomy": {
+                    "schema_version": "medeval_failure_taxonomy_v1",
+                    "legacy_failure_type": classification.primary_failure_type,
+                    "primary_failure_category": classification.primary_failure_category,
+                    "failure_categories": classification.failure_categories,
+                    "severity": classification.severity,
+                    "failure_stage": classification.failure_stage,
+                    "safety_relevant_failure": classification.safety_relevant,
+                    "diagnostic_notes": classification.diagnostic_notes,
+                    "category_metadata": classification.category_metadata,
                 },
             },
         )

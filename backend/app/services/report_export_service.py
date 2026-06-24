@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.evals.failure_taxonomy import SEVERITY_ORDER, failure_taxonomy
 from app.models.evaluation_result import EvaluationResult
 from app.models.experiment import Experiment
 from app.models.model_response import ModelResponse
@@ -35,6 +36,7 @@ class ReportExportService:
         ]
         generated_at = datetime.now(UTC)
         claim_metrics = self._aggregate_claim_metrics(db, experiment_id)
+        failure_diagnostics = self._failure_diagnostic_summary(responses)
         report = {
             "experiment": experiment,
             "results": results,
@@ -47,6 +49,17 @@ class ReportExportService:
                 "failure_type_counts": dict(
                     Counter(row["failure_type"] or "unknown" for row in failures)
                 ),
+                "legacy_failure_type_counts": dict(
+                    Counter(row["failure_type"] or "unknown" for row in failures)
+                ),
+                "rich_failure_category_counts": failure_diagnostics[
+                    "rich_failure_category_counts"
+                ],
+                "failure_stage_counts": failure_diagnostics["failure_stage_counts"],
+                "failure_severity_counts": failure_diagnostics["failure_severity_counts"],
+                "safety_relevant_failure_count": failure_diagnostics[
+                    "safety_relevant_failure_count"
+                ],
                 "claim_metrics": claim_metrics,
                 "limitations": [
                     "Synthetic samples and public healthcare seed datasets are in development.",
@@ -80,6 +93,8 @@ class ReportExportService:
             metrics = self._comparison_metrics(aggregate)
             if index == 0:
                 baseline_metrics = metrics
+            rows = self.response_rows(db, experiment_id)
+            diagnostics = self._failure_diagnostic_summary(rows)
             summaries.append(
                 {
                     "experiment_id": str(experiment.id),
@@ -93,6 +108,14 @@ class ReportExportService:
                     "metrics": metrics,
                     "deltas_vs_baseline": self._metric_deltas(metrics, baseline_metrics or {}),
                     "failure_type_counts": aggregate.failure_type_counts,
+                    "rich_failure_category_counts": diagnostics[
+                        "rich_failure_category_counts"
+                    ],
+                    "failure_stage_counts": diagnostics["failure_stage_counts"],
+                    "failure_severity_counts": diagnostics["failure_severity_counts"],
+                    "safety_relevant_failure_count": diagnostics[
+                        "safety_relevant_failure_count"
+                    ],
                 }
             )
 
@@ -130,6 +153,7 @@ class ReportExportService:
             evaluation = self._latest_evaluation(response)
             metadata = evaluation.metadata_json if evaluation else {}
             failure_analysis = metadata.get("failure_analysis", {}) if metadata else {}
+            taxonomy = self.failure_taxonomy_payload(evaluation)
             claim_support = metadata.get("claim_support", {}) if metadata else {}
             rows.append(
                 {
@@ -154,6 +178,12 @@ class ReportExportService:
                     "failure_reason": failure_analysis.get("failure_reason"),
                     "retrieval_failure": failure_analysis.get("retrieval_failure"),
                     "generation_failure": failure_analysis.get("generation_failure"),
+                    "primary_failure_category": taxonomy.get("primary_failure_category"),
+                    "failure_categories": taxonomy.get("failure_categories", []),
+                    "failure_severity": taxonomy.get("severity"),
+                    "failure_stage": taxonomy.get("failure_stage"),
+                    "safety_relevant_failure": taxonomy.get("safety_relevant_failure"),
+                    "diagnostic_notes": taxonomy.get("diagnostic_notes", []),
                     "claim_count": claim_support.get("claim_count"),
                     "claim_support_rate": claim_support.get("claim_support_rate"),
                     "unsupported_claim_rate": claim_support.get("unsupported_claim_rate"),
@@ -205,7 +235,7 @@ class ReportExportService:
             "- Unsupported claim rate: "
             f"{self._format_metric(claim_metrics.get('unsupported_claim_rate'))}",
             "",
-            "## Failure Counts",
+            "## Legacy Failure Counts",
             "",
         ]
         failure_counts = metadata.get("failure_type_counts", {})
@@ -216,6 +246,32 @@ class ReportExportService:
             )
         else:
             lines.append("- No failure rows found for this experiment.")
+        lines.extend(["", "## Rich Failure Diagnostics", ""])
+        rich_counts = metadata.get("rich_failure_category_counts", {})
+        if rich_counts:
+            lines.extend(f"- {key}: {value}" for key, value in sorted(rich_counts.items()))
+        else:
+            lines.append("- No rich failure categories found for this experiment.")
+        lines.extend(["", "### Failure Stages", ""])
+        stage_counts = metadata.get("failure_stage_counts", {})
+        if stage_counts:
+            lines.extend(f"- {key}: {value}" for key, value in sorted(stage_counts.items()))
+        else:
+            lines.append("- No failure stages found.")
+        lines.extend(["", "### Severity", ""])
+        severity_counts = metadata.get("failure_severity_counts", {})
+        if severity_counts:
+            lines.extend(
+                f"- {key}: {value}" for key, value in sorted(severity_counts.items())
+            )
+        else:
+            lines.append("- No severity counts found.")
+        lines.extend(
+            [
+                "",
+                f"- Safety-relevant failures: {metadata.get('safety_relevant_failure_count', 0)}",
+            ]
+        )
         lines.extend(["", "## Representative Failure Examples", ""])
         failures = report["failure_examples"]
         if failures:
@@ -227,6 +283,14 @@ class ReportExportService:
                         f"Question: {failure['question']}",
                         "",
                         f"Failure reason: {failure.get('failure_reason') or 'n/a'}",
+                        "",
+                        "Rich categories: "
+                        f"{', '.join(failure.get('failure_categories') or []) or 'n/a'}",
+                        "",
+                        f"Severity: {failure.get('failure_severity') or 'n/a'}",
+                        "",
+                        "Diagnostic notes: "
+                        f"{'; '.join(failure.get('diagnostic_notes') or []) or 'n/a'}",
                         "",
                         f"Answer: {failure['answer_text']}",
                         "",
@@ -285,6 +349,12 @@ class ReportExportService:
             "failure_reason",
             "retrieval_failure",
             "generation_failure",
+            "primary_failure_category",
+            "failure_categories",
+            "failure_severity",
+            "failure_stage",
+            "safety_relevant_failure",
+            "diagnostic_notes",
             "claim_count",
             "claim_support_rate",
             "unsupported_claim_rate",
@@ -328,6 +398,10 @@ class ReportExportService:
             "refusal_accuracy_delta",
             "hallucination_rate_delta",
             "failure_type_counts",
+            "rich_failure_category_counts",
+            "failure_stage_counts",
+            "failure_severity_counts",
+            "safety_relevant_failure_count",
         ]
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
@@ -364,6 +438,23 @@ class ReportExportService:
                         f"{key}:{value}"
                         for key, value in sorted(experiment["failure_type_counts"].items())
                     ),
+                    "rich_failure_category_counts": ";".join(
+                        f"{key}:{value}"
+                        for key, value in sorted(
+                            experiment["rich_failure_category_counts"].items()
+                        )
+                    ),
+                    "failure_stage_counts": ";".join(
+                        f"{key}:{value}"
+                        for key, value in sorted(experiment["failure_stage_counts"].items())
+                    ),
+                    "failure_severity_counts": ";".join(
+                        f"{key}:{value}"
+                        for key, value in sorted(experiment["failure_severity_counts"].items())
+                    ),
+                    "safety_relevant_failure_count": experiment[
+                        "safety_relevant_failure_count"
+                    ],
                 }
             )
         return output.getvalue()
@@ -454,6 +545,32 @@ class ReportExportService:
                 lines.append("- No failure counts available.")
             lines.append("")
 
+        lines.extend(["## Rich Failure Diagnostics", ""])
+        for experiment in report["experiments"]:
+            lines.extend([f"### {experiment['name']}", ""])
+            rich_counts = experiment["rich_failure_category_counts"]
+            if rich_counts:
+                lines.append("Failure categories:")
+                lines.extend(f"- {key}: {value}" for key, value in sorted(rich_counts.items()))
+            else:
+                lines.append("- No rich failure category counts available.")
+            stage_counts = experiment["failure_stage_counts"]
+            if stage_counts:
+                lines.append("")
+                lines.append("Failure stages:")
+                lines.extend(f"- {key}: {value}" for key, value in sorted(stage_counts.items()))
+            severity_counts = experiment["failure_severity_counts"]
+            if severity_counts:
+                lines.append("")
+                lines.append("Severity:")
+                lines.extend(
+                    f"- {key}: {value}" for key, value in sorted(severity_counts.items())
+                )
+            lines.append(
+                f"- Safety-relevant failures: {experiment['safety_relevant_failure_count']}"
+            )
+            lines.append("")
+
         lines.extend(
             [
                 "## Notes And Limitations",
@@ -469,6 +586,97 @@ class ReportExportService:
             ]
         )
         return "\n".join(lines)
+
+    def failure_taxonomy_payload(
+        self, evaluation: EvaluationResult | None
+    ) -> dict[str, Any]:
+        if evaluation is None:
+            return {
+                "primary_failure_category": None,
+                "failure_categories": [],
+                "severity": None,
+                "failure_stage": None,
+                "safety_relevant_failure": False,
+                "diagnostic_notes": [],
+                "category_metadata": [],
+            }
+        metadata = evaluation.metadata_json or {}
+        existing = metadata.get("failure_taxonomy")
+        if isinstance(existing, dict):
+            return {
+                "primary_failure_category": existing.get("primary_failure_category"),
+                "failure_categories": existing.get("failure_categories", []),
+                "severity": existing.get("severity"),
+                "failure_stage": existing.get("failure_stage"),
+                "safety_relevant_failure": existing.get("safety_relevant_failure", False),
+                "diagnostic_notes": existing.get("diagnostic_notes", []),
+                "category_metadata": existing.get("category_metadata", []),
+            }
+
+        categories = failure_taxonomy.categories_for_legacy(evaluation.failure_type)
+        primary = categories[0] if categories else None
+        severity = self._category_severity(categories)
+        return {
+            "primary_failure_category": primary,
+            "failure_categories": categories,
+            "severity": severity,
+            "failure_stage": failure_taxonomy.metadata_for(primary).stage
+            if primary
+            else None,
+            "safety_relevant_failure": any(
+                failure_taxonomy.metadata_for(label).safety_relevant
+                for label in categories
+            ),
+            "diagnostic_notes": [
+                f"Mapped from legacy failure_type={evaluation.failure_type}."
+            ]
+            if categories
+            else [],
+            "category_metadata": [
+                {
+                    "label": failure_taxonomy.metadata_for(label).label,
+                    "title": failure_taxonomy.metadata_for(label).title,
+                    "definition": failure_taxonomy.metadata_for(label).definition,
+                    "stage": failure_taxonomy.metadata_for(label).stage,
+                    "default_severity": failure_taxonomy.metadata_for(label).default_severity,
+                    "safety_relevant": failure_taxonomy.metadata_for(label).safety_relevant,
+                }
+                for label in categories
+            ],
+        }
+
+    def _failure_diagnostic_summary(self, rows: list[dict[str, Any]]) -> dict[str, Any]:
+        category_counts: Counter[str] = Counter()
+        stage_counts: Counter[str] = Counter()
+        severity_counts: Counter[str] = Counter()
+        safety_relevant_count = 0
+        for row in rows:
+            categories = row.get("failure_categories") or []
+            category_counts.update(categories)
+            if row.get("failure_stage"):
+                stage_counts.update([row["failure_stage"]])
+            if row.get("failure_severity"):
+                severity_counts.update([row["failure_severity"]])
+            if row.get("safety_relevant_failure"):
+                safety_relevant_count += 1
+        return {
+            "rich_failure_category_counts": dict(category_counts),
+            "failure_stage_counts": dict(stage_counts),
+            "failure_severity_counts": dict(severity_counts),
+            "safety_relevant_failure_count": safety_relevant_count,
+        }
+
+    @staticmethod
+    def _category_severity(categories: list[str]) -> str | None:
+        if not categories:
+            return None
+        return max(
+            (
+                failure_taxonomy.metadata_for(label).default_severity
+                for label in categories
+            ),
+            key=lambda severity: SEVERITY_ORDER[severity],
+        )
 
     @staticmethod
     def _latest_evaluation(response: ModelResponse) -> EvaluationResult | None:

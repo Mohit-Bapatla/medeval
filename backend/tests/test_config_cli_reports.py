@@ -61,10 +61,17 @@ def test_report_markdown_and_csv_exports(client) -> None:
     markdown = client.get(f"/api/v1/experiments/{experiment['id']}/report?format=markdown")
     assert markdown.status_code == 200
     assert "not clinical validation" in markdown.text
+    assert "Rich Failure Diagnostics" in markdown.text
+
+    json_report = client.get(f"/api/v1/experiments/{experiment['id']}/report?format=json")
+    assert json_report.status_code == 200
+    assert "rich_failure_category_counts" in json_report.json()["metadata"]
 
     csv_response = client.get(f"/api/v1/experiments/{experiment['id']}/results.csv")
     assert csv_response.status_code == 200
     assert "response_id,qa_example_id,question" in csv_response.text
+    assert "primary_failure_category" in csv_response.text
+    assert "failure_categories" in csv_response.text
 
 
 def test_medeval_v1_deterministic_config_parses() -> None:
@@ -223,9 +230,14 @@ def test_cli_compare_runs_exports_markdown_json_and_csv(monkeypatch, tmp_path) -
     parsed = json.loads(json_out.read_text(encoding="utf-8"))
     assert parsed["metadata"]["experiment_count"] == 2
     assert parsed["experiments"][1]["deltas_vs_baseline"]["avg_correctness_delta"] > 0
+    assert parsed["experiments"][0]["rich_failure_category_counts"] == {
+        "retrieval_miss": 1
+    }
     csv_text = csv_out.read_text(encoding="utf-8")
     assert "experiment_id,experiment_id_short,name,status" in csv_text
     assert "correctness_delta" in csv_text
+    assert "rich_failure_category_counts" in csv_text
+    assert "retrieval_miss:1" in csv_text
 
 
 def test_cli_compare_runs_rejects_unknown_or_noncompleted_experiments(

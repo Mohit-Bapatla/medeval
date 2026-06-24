@@ -80,3 +80,7 @@ def test_evaluation_flags_failed_refusal_as_hallucination(db_session: Session) -
     assert result.refusal_score == 0.0
     assert result.hallucination_flag is True
     assert result.failure_type == "failed_to_refuse"
+    assert result.metadata_json["failure_taxonomy"]["primary_failure_category"] == (
+        "failed_refusal"
+    )
+    assert result.metadata_json["failure_taxonomy"]["severity"] == "critical"

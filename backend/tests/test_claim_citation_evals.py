@@ -46,6 +46,8 @@ def test_failure_taxonomy_separates_retrieval_and_generation() -> None:
     )
 
     assert retrieval_miss.primary_failure_type == "retrieval_miss"
+    assert retrieval_miss.primary_failure_category == "retrieval_miss"
     assert retrieval_miss.retrieval_failure is True
     assert generation_failure.primary_failure_type == "fabricated_benefit"
+    assert generation_failure.primary_failure_category == "unsupported_claim"
     assert generation_failure.generation_failure is True

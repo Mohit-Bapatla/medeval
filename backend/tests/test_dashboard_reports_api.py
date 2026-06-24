@@ -45,6 +45,9 @@ def test_experiment_responses_failures_report_and_trace(client: TestClient) -> N
         assert "secondary_failure_types" in failure_rows[0]
         assert "retrieval_failure" in failure_rows[0]
         assert "generation_failure" in failure_rows[0]
+        assert "primary_failure_category" in failure_rows[0]
+        assert "failure_categories" in failure_rows[0]
+        assert "failure_severity" in failure_rows[0]
 
     trace = client.get(f"/api/v1/responses/{response_id}/trace")
     assert trace.status_code == 200
