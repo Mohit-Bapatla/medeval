@@ -5,7 +5,7 @@ dataset scaffold plus a small seed set of real public healthcare source
 documents. It is not a completed benchmark, validated clinical dataset, or
 source of benchmark results.
 
-Current Batch 5 status:
+Current Batch 7 status:
 
 - Real public source documents: 14
 - Real evidence-linked QA examples: 92
@@ -13,6 +13,8 @@ Current Batch 5 status:
 - Example QA fixtures: 3 small schema examples kept separate from real stats
 - Deterministic local baseline config: available
 - Multi-config deterministic comparison configs: available
+- Current deterministic seed report artifacts: available under `reports/`
+- Rich failure taxonomy diagnostics: included in generated reports
 - External provider comparisons: future batches
 - Clinical validation: none
 
@@ -129,24 +131,44 @@ These reports are local deterministic baseline artifacts for an in-development
 public healthcare seed dataset. They are not clinically validated, not medical
 advice, and not benchmark-complete results.
 
+## Current Deterministic Seed Artifacts
+
+The repository includes current deterministic local report artifacts under
+`reports/`:
+
+- `medeval_v1_seed_report.md`
+- `medeval_v1_seed_report.json`
+- `medeval_v1_seed_results.csv`
+- `medeval_v1_comparison_report.md`
+- `medeval_v1_comparison_report.json`
+- `medeval_v1_comparison_results.csv`
+
+These artifacts were generated from local Postgres-backed deterministic runs
+over the 14-document, 92-QA public healthcare seed dataset. They include
+heuristic rich failure diagnostics: category counts, stage counts, severity
+counts, safety-relevant failure counts, legacy failure counts, and
+representative failure examples with diagnostic notes.
+
+They are not clinically validated, not medical advice, not a completed
+benchmark, and not a real model leaderboard.
+
 ## Multi-Config Deterministic Comparisons
 
 After seeding the dataset, run several deterministic variants:
 
 ```bash
 medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic.yaml
-medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top3.yaml
-medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top8.yaml
-medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_refusal_aware.yaml
 medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_clean_context.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_refusal_aware.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top5_clean_refusal.yaml
 ```
 
 Then compare completed experiment IDs:
 
 ```bash
-medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --experiment-id <top8-id> --format markdown --out ../reports/medeval_v1_comparison_report.md
-medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format json --out ../reports/medeval_v1_comparison_report.json
-medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format markdown --out ../reports/medeval_v1_comparison_report.md
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format json --out ../reports/medeval_v1_comparison_report.json
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
 ```
 
 The clean-context variant removes YAML frontmatter and source metadata lines

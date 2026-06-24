@@ -6,7 +6,7 @@ MedEval v1 is currently an in-development dataset scaffold with a small seed set
 of real public healthcare source documents. It is not a completed benchmark and
 does not contain validated benchmark results.
 
-Current Batch 5 contents:
+Current Batch 7 contents:
 
 - 14 concise public-document seed files
 - source metadata in `datasets/medeval-v1/metadata/docs.json`
@@ -15,6 +15,8 @@ Current Batch 5 contents:
 - 3 small QA example fixtures kept separate from real dataset stats
 - deterministic local baseline config and seed command support
 - deterministic local comparison configs and `compare-runs` reporting
+- deterministic seed report artifacts under `reports/`
+- heuristic rich failure taxonomy diagnostics in report exports
 - no clinical validation
 
 ## Intended Use
@@ -126,3 +128,19 @@ debugging/regression artifacts for an in-development public healthcare seed
 dataset. The refusal-aware variant is explicitly metadata-assisted and should be
 interpreted as a deterministic control, not a real model capability or validated
 leaderboard result.
+
+## Current Deterministic Seed Artifacts
+
+The current checked-in deterministic artifacts are:
+
+- one baseline Markdown/JSON/CSV report for the MedEval v1 public healthcare
+  seed dataset;
+- one Markdown/JSON/CSV comparison report across baseline, clean-context,
+  metadata-assisted refusal control, and clean-context refusal control configs;
+- rich failure taxonomy diagnostics including category, stage, severity, and
+  safety-relevant failure counts.
+
+These artifacts are generated from local deterministic runs and are intended for
+reproducibility, debugging, and regression inspection. They are not clinical
+validation, medical advice, a completed benchmark, production-use evidence, or
+a real model leaderboard.

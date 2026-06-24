@@ -15,10 +15,11 @@ from app.models.model_response import ModelResponse
 from app.services.experiment_service import experiment_service
 
 DISCLAIMER = (
-    "This report is computed from the connected local database. Synthetic samples or "
-    "in-development public healthcare seed datasets, deterministic providers, and "
-    "heuristic evaluators are not validated benchmarks, clinical validation, medical "
-    "advice, healthcare validation, or production-use evidence."
+    "This report is computed from a local deterministic run over the connected "
+    "database, including synthetic samples or the in-development MedEval v1 public "
+    "healthcare seed dataset. It is not a validated benchmark, clinical validation, "
+    "medical advice, healthcare validation, production-use evidence, or an external "
+    "adoption claim."
 )
 
 
@@ -277,21 +278,25 @@ class ReportExportService:
         if failures:
             for failure in failures[:5]:
                 lines.extend(
-                    [
-                        f"### {failure.get('failure_type') or 'flagged'}",
-                        "",
-                        f"Question: {failure['question']}",
-                        "",
-                        f"Failure reason: {failure.get('failure_reason') or 'n/a'}",
-                        "",
-                        "Rich categories: "
-                        f"{', '.join(failure.get('failure_categories') or []) or 'n/a'}",
-                        "",
-                        f"Severity: {failure.get('failure_severity') or 'n/a'}",
-                        "",
-                        "Diagnostic notes: "
-                        f"{'; '.join(failure.get('diagnostic_notes') or []) or 'n/a'}",
-                        "",
+                        [
+                            f"### {failure.get('failure_type') or 'flagged'}",
+                            "",
+                            f"Question: {failure['question']}",
+                            "",
+                            f"Legacy failure type: {failure.get('failure_type') or 'n/a'}",
+                            "",
+                            f"Failure reason: {failure.get('failure_reason') or 'n/a'}",
+                            "",
+                            "Rich categories: "
+                            f"{', '.join(failure.get('failure_categories') or []) or 'n/a'}",
+                            "",
+                            f"Severity: {failure.get('failure_severity') or 'n/a'}",
+                            "",
+                            f"Stage: {failure.get('failure_stage') or 'n/a'}",
+                            "",
+                            "Diagnostic notes: "
+                            f"{'; '.join(failure.get('diagnostic_notes') or []) or 'n/a'}",
+                            "",
                         f"Answer: {failure['answer_text']}",
                         "",
                     ]
@@ -360,7 +365,12 @@ class ReportExportService:
             "unsupported_claim_rate",
             "created_at",
         ]
-        writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
+        writer = csv.DictWriter(
+            output,
+            fieldnames=fieldnames,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         writer.writeheader()
         for row in rows:
             serializable = {
@@ -403,7 +413,7 @@ class ReportExportService:
             "failure_severity_counts",
             "safety_relevant_failure_count",
         ]
-        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer = csv.DictWriter(output, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         for experiment in report["experiments"]:
             metrics = experiment["metrics"]
@@ -578,7 +588,7 @@ class ReportExportService:
                 "- Deterministic local comparisons are useful for pipeline debugging and "
                 "regression testing.",
                 "- Refusal-aware variants may use QA metadata as a deterministic control, "
-                "not as a real model capability.",
+                "or oracle/control, not as a real model capability.",
                 "- Clean-context variants strip frontmatter and source metadata before "
                 "deterministic answer generation.",
                 "- These reports do not claim real-world performance, clinical validation, "

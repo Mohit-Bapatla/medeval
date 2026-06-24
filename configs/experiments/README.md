@@ -59,17 +59,22 @@ Example comparison workflow:
 cd backend
 medeval seed-dataset --path ../datasets/medeval-v1 --dataset-name "MedEval v1 Public Healthcare Seed"
 medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic.yaml
-medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top3.yaml
 medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_clean_context.yaml
-medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --experiment-id <clean-id> --format markdown --out ../reports/medeval_v1_comparison_report.md
-medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format json --out ../reports/medeval_v1_comparison_report.json
-medeval compare-runs --experiment-id <baseline-id> --experiment-id <top3-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_refusal_aware.yaml
+medeval run-experiment --config ../configs/experiments/medeval_v1_deterministic_top5_clean_refusal.yaml
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format markdown --out ../reports/medeval_v1_comparison_report.md
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format json --out ../reports/medeval_v1_comparison_report.json
+medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
 ```
 
 Comparison exports include aggregate metrics, deltas versus the baseline run,
 legacy `failure_type` counts, rich failure category counts, stage counts,
 severity counts, and safety-relevant failure counts. These diagnostics are
 heuristic local debugging signals, not clinical adjudication.
+
+Current deterministic MedEval v1 seed artifacts are committed under `reports/`.
+They cover 14 public healthcare documents, 92 evidence-linked QA examples, and
+the four-config deterministic comparison shown above.
 
 These comparisons are local deterministic debugging artifacts. They are not
 clinical validation, medical advice, production readiness evidence, or a

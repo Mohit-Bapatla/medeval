@@ -62,4 +62,4 @@ def test_experiment_responses_failures_report_and_trace(client: TestClient) -> N
     report = client.get(f"/api/v1/experiments/{experiment_id}/report")
     assert report.status_code == 200
     assert "MedEval Experiment Report" in report.json()["markdown"]
-    assert "not validated benchmarks" in report.json()["disclaimer"]
+    assert "not a validated benchmark" in report.json()["disclaimer"]

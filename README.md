@@ -18,9 +18,10 @@ questions, and expose failure modes that engineers can inspect.
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-early_development-yellow)
 
-> Current status: early development with synthetic local demo data. This
-> repository does not contain validated benchmark results, clinical validation,
-> healthcare validation, production-use claims, or external adoption claims.
+> Current status: early development with synthetic local demo data and an
+> in-development MedEval v1 public healthcare seed dataset. This repository
+> does not contain validated benchmark results, clinical validation, healthcare
+> validation, production-use claims, or external adoption claims.
 
 ## Screenshots
 
@@ -150,6 +151,18 @@ This dataset uses fake/demo content only:
 
 It is intended for local demo, development, tests, and contributor onboarding.
 See [docs/benchmark-card.md](docs/benchmark-card.md).
+
+## MedEval v1 Public Healthcare Seed
+
+The repository also includes an in-development MedEval v1 public healthcare
+seed dataset with 14 public source documents and 92 evidence-linked QA
+examples. Current deterministic local report artifacts are available under
+`reports/`, including a baseline report and a four-config comparison with
+heuristic rich failure diagnostics.
+
+These artifacts use deterministic local providers only. They are not clinically
+validated, not medical advice, not a completed benchmark, and not a real model
+leaderboard.
 
 ## Quickstart
 
