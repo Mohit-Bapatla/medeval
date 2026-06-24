@@ -50,7 +50,7 @@ The in-development MedEval v1 public healthcare seed currently includes:
 | Deterministic comparison workflow | 4 configs |
 | Rich failure taxonomy | 15 categories |
 | Manual calibration | 50 self-reviewed labels |
-| Review coverage | 21.7% of 230 baseline responses |
+| Manual review coverage | 50 high-priority failures reviewed, 21.7% of baseline responses |
 | Reproducibility | `make medeval-v1-smoke` |
 
 The current public-facing report is
@@ -61,17 +61,29 @@ The current public-facing report is
 These screenshots come from the local dashboard running against the MedEval v1
 public healthcare seed dataset and deterministic local experiment artifacts.
 
-| Overview Dashboard | Experiment Detail |
-| --- | --- |
-| ![Overview dashboard](docs/assets/screenshots/overview-dashboard-v1.png) | ![Experiment detail](docs/assets/screenshots/experiment-detail-v1.png) |
+### Overview Dashboard
 
-| Human Review Dashboard | Human Review Detail |
-| --- | --- |
-| ![Human review dashboard](docs/assets/screenshots/human-review-dashboard.png) | ![Human review detail](docs/assets/screenshots/human-review-detail.png) |
+![Overview Dashboard](docs/assets/screenshots/overview-dashboard-v1.png)
 
-| Failure Analysis | Reports |
-| --- | --- |
-| ![Failure taxonomy report](docs/assets/screenshots/failure-taxonomy-report.png) | ![Experiment comparison report](docs/assets/screenshots/experiment-comparison-report.png) |
+### Experiment Detail
+
+![Experiment Detail](docs/assets/screenshots/experiment-detail-v1.png)
+
+### Human Review Dashboard
+
+![Human Review Dashboard](docs/assets/screenshots/human-review-dashboard.png)
+
+### Human Review Detail
+
+![Human Review Detail](docs/assets/screenshots/human-review-detail.png)
+
+### Failure Analysis
+
+![Failure Analysis](docs/assets/screenshots/failure-taxonomy-report.png)
+
+### Reports
+
+![Reports](docs/assets/screenshots/experiment-comparison-report.png)
 
 ## Why It Matters
 
