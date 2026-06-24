@@ -429,6 +429,7 @@ class HumanReviewService:
             "adjudication_status": normalized.get("adjudication_status") or "none",
             "sample": bool(normalized.get("sample")),
             "sample_notes": normalized.get("sample_notes"),
+            "packet_metadata": normalized.get("packet_metadata"),
             "automated_failure_categories": automated.get("failure_categories", []),
             "automated_severity": automated.get("severity"),
             "automated_score": automated.get("overall_score"),

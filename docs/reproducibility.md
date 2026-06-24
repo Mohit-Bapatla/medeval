@@ -104,19 +104,31 @@ The checker intentionally does not validate:
 
 ## Optional Manual Review Workflow
 
-After a deterministic experiment run, you can export a manual review queue and
+After a deterministic experiment run, you can export a curated pending review
+packet, validate it, import completed reviews, check progress, and export
 calibration summaries:
 
 ```bash
 cd backend
-medeval export-review-queue --experiment-id <experiment-id> --out ../reports/medeval_v1_review_queue.json
-medeval import-reviews --path ../reports/examples/medeval_v1_reviews.sample.json --reviewer-label "sample_fixture_reviewer" --experiment-id <experiment-id>
+medeval export-review-packet --experiment-id <experiment-id> --out ../reports/examples/medeval_v1_review_packet_50.pending.json --format json --limit 50 --strategy failure_priority
+medeval validate-review-packet --path ../reports/examples/medeval_v1_review_packet_50.pending.json
+medeval review-progress --experiment-id <experiment-id>
+medeval import-review-packet --path ../reports/examples/medeval_v1_review_packet_50.pending.json --reviewer-label "mohit_manual_review"
 medeval export-review-summary --experiment-id <experiment-id> --format markdown --out ../reports/medeval_v1_review_summary.md
 ```
 
-The sample fixture is for workflow testing only. It is not real independent
-human review, clinician review, clinical validation, or medical advice. See
-`docs/human_review.md`.
+You can still export the full review queue or import the sample fixture for
+workflow testing:
+
+```bash
+medeval export-review-queue --experiment-id <experiment-id> --out ../reports/medeval_v1_review_queue.json
+medeval import-reviews --path ../reports/examples/medeval_v1_reviews.sample.json --reviewer-label "sample_fixture_reviewer" --experiment-id <experiment-id>
+```
+
+Pending packets and the sample fixture are for workflow testing or future manual
+review only. They are not real completed independent human review, clinician
+review, clinical validation, or medical advice. See `docs/manual_review_packet.md`
+and `docs/human_review.md`.
 
 ## Validate The Dataset Only
 

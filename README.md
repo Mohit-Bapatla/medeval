@@ -175,9 +175,11 @@ make medeval-v1-check-reports
 See [docs/reproducibility.md](docs/reproducibility.md).
 
 Manual review and calibration workflow documentation is available at
-[docs/human_review.md](docs/human_review.md). Sample review fixtures are
-workflow examples only, not real independent human review or clinical
-validation.
+[docs/human_review.md](docs/human_review.md). Curated pending review packet
+workflow documentation is available at
+[docs/manual_review_packet.md](docs/manual_review_packet.md). Sample review
+fixtures and pending packets are workflow examples only, not real completed
+independent human review or clinical validation.
 
 ## Quickstart
 

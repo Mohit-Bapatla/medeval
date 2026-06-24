@@ -25,6 +25,7 @@ from app.services.ingestion_service import ingestion_service
 from app.services.medeval_v1_seed_service import medeval_v1_seed_service
 from app.services.qa_import_service import qa_import_service
 from app.services.report_export_service import report_export_service
+from app.services.review_packet_service import review_packet_service
 
 app = typer.Typer(help="MedEval deterministic local development CLI.")
 
@@ -384,6 +385,125 @@ def export_review_queue(
     typer.echo(f"Wrote review queue to {out}")
 
 
+@app.command("export-review-packet")
+def export_review_packet(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+    out: Annotated[
+        Path,
+        typer.Option(help="Output review packet path."),
+    ] = Path("../reports/medeval_v1_review_packet_50.pending.json"),
+    format: Annotated[
+        str,
+        typer.Option(help="Packet format: json, markdown, or csv."),
+    ] = "json",
+    limit: Annotated[int, typer.Option(help="Maximum packet item count.")] = 50,
+    strategy: Annotated[
+        str,
+        typer.Option(help="Selection strategy: failure_priority, random, or balanced."),
+    ] = "failure_priority",
+    seed: Annotated[
+        int | None,
+        typer.Option(help="Optional random seed for random strategy."),
+    ] = None,
+) -> None:
+    """Export a curated pending manual-review packet."""
+    with SessionLocal() as db:
+        try:
+            packet = review_packet_service.build_packet(
+                db,
+                _parse_uuid(experiment_id),
+                limit=limit,
+                strategy=strategy,
+                seed=seed,
+            )
+        except (ReviewValidationError, ValueError) as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if format == "json":
+        out.write_text(review_packet_service.packet_json(packet), encoding="utf-8")
+    elif format == "markdown":
+        out.write_text(review_packet_service.packet_markdown(packet), encoding="utf-8")
+    elif format == "csv":
+        out.write_text(review_packet_service.packet_csv(packet), encoding="utf-8")
+    else:
+        raise typer.BadParameter("format must be json, markdown, or csv")
+    typer.echo(
+        f"Wrote {format} review packet to {out} "
+        f"({len(packet['items'])} pending items; strategy={strategy})"
+    )
+
+
+@app.command("validate-review-packet")
+def validate_review_packet(
+    path: Annotated[
+        Path,
+        typer.Option(help="Review packet JSON path.", exists=True, file_okay=True, dir_okay=False),
+    ],
+) -> None:
+    """Validate a pending or completed MedEval v1 review packet."""
+    db_checked = True
+    try:
+        with SessionLocal() as db:
+            result = review_packet_service.validate_packet(path, db=db)
+    except SQLAlchemyError:
+        db_checked = False
+        try:
+            result = review_packet_service.validate_packet(path, db=None)
+        except ReviewValidationError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    except ReviewValidationError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    typer.echo(
+        "Review packet valid: "
+        f"{result['item_count']} items; completed: {result['completed_count']}; "
+        f"pending: {result['pending_count']}; skipped: {result['skipped_count']}"
+    )
+    if not db_checked:
+        typer.echo("Database unavailable; response/evaluation existence checks were skipped.")
+
+
+@app.command("import-review-packet")
+def import_review_packet(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Completed review packet JSON path.",
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+        ),
+    ],
+    reviewer_label: Annotated[
+        str | None,
+        typer.Option(help="Override reviewer label for imported packet items."),
+    ] = None,
+    include_pending: Annotated[
+        bool,
+        typer.Option(help="Import pending packet items as pending review records."),
+    ] = False,
+) -> None:
+    """Validate and import completed items from a MedEval v1 review packet."""
+    with SessionLocal() as db:
+        try:
+            result = review_packet_service.import_packet(
+                db,
+                path,
+                reviewer_label=reviewer_label,
+                include_pending=include_pending,
+            )
+        except ReviewValidationError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    typer.echo(
+        "Review packet import: "
+        f"imported: {result['imported']}; updated existing: {result['updated']}; "
+        f"skipped pending: {result['skipped_pending']}; invalid: {result['invalid']}"
+    )
+
+
 @app.command("import-reviews")
 def import_reviews(
     path: Annotated[
@@ -415,6 +535,20 @@ def import_reviews(
         "Reviews imported: "
         f"{result['imported']}; updated: {result['updated']}; skipped: {result['skipped']}"
     )
+
+
+@app.command("review-progress")
+def review_progress(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+) -> None:
+    """Print manual review progress and calibration availability for an experiment."""
+    with SessionLocal() as db:
+        try:
+            progress = review_packet_service.review_progress(db, _parse_uuid(experiment_id))
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    typer.echo(_json_report(progress))
 
 
 @app.command("export-review-summary")

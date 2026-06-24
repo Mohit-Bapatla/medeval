@@ -84,13 +84,26 @@ testing the MedEval v1 manual review import workflow. It is marked
 `sample: true` and is not real independent human review, clinician review,
 clinical validation, medical advice, or benchmark validation.
 
+`reports/examples/medeval_v1_review_packet_50.pending.json` and the matching
+Markdown worksheet, when present, are pending manual review packets. They contain
+blank review fields and are not completed human review. Do not cite them as
+human-reviewed outputs until a reviewer fills them out, validates them, and
+imports the completed records.
+
 Generate review artifacts on demand:
 
 ```bash
 cd backend
+medeval export-review-packet --experiment-id <experiment-id> --out ../reports/examples/medeval_v1_review_packet_50.pending.json --format json --limit 50 --strategy failure_priority
+medeval export-review-packet --experiment-id <experiment-id> --out ../reports/examples/medeval_v1_review_packet_50.pending.md --format markdown --limit 50 --strategy failure_priority
+medeval validate-review-packet --path ../reports/examples/medeval_v1_review_packet_50.pending.json
+medeval review-progress --experiment-id <experiment-id>
+medeval import-review-packet --path ../reports/examples/medeval_v1_review_packet_50.pending.json --reviewer-label "mohit_manual_review"
 medeval export-review-queue --experiment-id <experiment-id> --out ../reports/medeval_v1_review_queue.json
 medeval import-reviews --path ../reports/examples/medeval_v1_reviews.sample.json --reviewer-label "sample_fixture_reviewer" --experiment-id <experiment-id>
 medeval export-review-summary --experiment-id <experiment-id> --format markdown --out ../reports/medeval_v1_review_summary.md
 medeval export-review-summary --experiment-id <experiment-id> --format json --out ../reports/medeval_v1_review_summary.json
 medeval export-review-summary --experiment-id <experiment-id> --format csv --out ../reports/medeval_v1_review_summary.csv
 ```
+
+See `docs/manual_review_packet.md` for the rubric and packet workflow.

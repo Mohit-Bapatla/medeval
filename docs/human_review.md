@@ -62,6 +62,29 @@ The queue includes experiment metadata, question, gold answer, generated answer,
 retrieved/cited chunks, automated scores, legacy failure type, rich failure
 taxonomy diagnostics, and a blank review template.
 
+## Curated Review Packets
+
+For focused manual review, export a curated pending packet instead of the full
+queue:
+
+```bash
+cd backend
+medeval export-review-packet --experiment-id <experiment-id> --out ../reports/examples/medeval_v1_review_packet_50.pending.json --format json --limit 50 --strategy failure_priority
+medeval validate-review-packet --path ../reports/examples/medeval_v1_review_packet_50.pending.json
+medeval review-progress --experiment-id <experiment-id>
+```
+
+Packet strategies include `failure_priority`, `random`, and `balanced`.
+Pending packet fields are blank and are not real completed review. After manual
+completion, import with:
+
+```bash
+medeval import-review-packet --path ../reports/examples/medeval_v1_review_packet_50.pending.json --reviewer-label "mohit_manual_review"
+```
+
+See [Manual Review Packets](manual_review_packet.md) for the full rubric,
+validation rules, import behavior, and progress workflow.
+
 ## Dashboard Review Panel
 
 The Next.js dashboard includes a lightweight `/human-review` route for manual
