@@ -75,3 +75,21 @@ medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-contex
 medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format json --out ../reports/medeval_v1_comparison_report.json
 medeval compare-runs --experiment-id <baseline-id> --experiment-id <clean-context-id> --experiment-id <refusal-aware-id> --experiment-id <clean-refusal-id> --format csv --out ../reports/medeval_v1_comparison_results.csv
 ```
+
+## Manual Review Artifacts
+
+`reports/examples/medeval_v1_reviews.sample.json` is a tiny sample fixture for
+testing the MedEval v1 manual review import workflow. It is marked
+`sample: true` and is not real independent human review, clinician review,
+clinical validation, medical advice, or benchmark validation.
+
+Generate review artifacts on demand:
+
+```bash
+cd backend
+medeval export-review-queue --experiment-id <experiment-id> --out ../reports/medeval_v1_review_queue.json
+medeval import-reviews --path ../reports/examples/medeval_v1_reviews.sample.json --reviewer-label "sample_fixture_reviewer" --experiment-id <experiment-id>
+medeval export-review-summary --experiment-id <experiment-id> --format markdown --out ../reports/medeval_v1_review_summary.md
+medeval export-review-summary --experiment-id <experiment-id> --format json --out ../reports/medeval_v1_review_summary.json
+medeval export-review-summary --experiment-id <experiment-id> --format csv --out ../reports/medeval_v1_review_summary.csv
+```

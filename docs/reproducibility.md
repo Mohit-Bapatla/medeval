@@ -102,6 +102,22 @@ The checker intentionally does not validate:
 - real-world model leaderboard ranking;
 - production readiness.
 
+## Optional Manual Review Workflow
+
+After a deterministic experiment run, you can export a manual review queue and
+calibration summaries:
+
+```bash
+cd backend
+medeval export-review-queue --experiment-id <experiment-id> --out ../reports/medeval_v1_review_queue.json
+medeval import-reviews --path ../reports/examples/medeval_v1_reviews.sample.json --reviewer-label "sample_fixture_reviewer" --experiment-id <experiment-id>
+medeval export-review-summary --experiment-id <experiment-id> --format markdown --out ../reports/medeval_v1_review_summary.md
+```
+
+The sample fixture is for workflow testing only. It is not real independent
+human review, clinician review, clinical validation, or medical advice. See
+`docs/human_review.md`.
+
 ## Validate The Dataset Only
 
 ```bash

@@ -20,6 +20,7 @@ from app.services.config_service import config_service
 from app.services.dataset_service import dataset_service
 from app.services.embedding_service import get_embedding_provider
 from app.services.experiment_service import experiment_service
+from app.services.human_review_service import ReviewValidationError, human_review_service
 from app.services.ingestion_service import ingestion_service
 from app.services.medeval_v1_seed_service import medeval_v1_seed_service
 from app.services.qa_import_service import qa_import_service
@@ -361,6 +362,90 @@ def compare_runs(
     else:
         raise typer.BadParameter("format must be markdown, json, or csv")
     typer.echo(f"Wrote {format} comparison report to {out}")
+
+
+@app.command("export-review-queue")
+def export_review_queue(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+    out: Annotated[
+        Path,
+        typer.Option(help="Output review queue JSON path."),
+    ] = Path("../reports/medeval_v1_review_queue.json"),
+) -> None:
+    """Export a MedEval v1 manual review queue with automated diagnostics."""
+    with SessionLocal() as db:
+        try:
+            queue = human_review_service.build_review_queue(db, _parse_uuid(experiment_id))
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_json_report(queue), encoding="utf-8")
+    typer.echo(f"Wrote review queue to {out}")
+
+
+@app.command("import-reviews")
+def import_reviews(
+    path: Annotated[
+        Path,
+        typer.Option(help="Review JSON path.", exists=True, file_okay=True, dir_okay=False),
+    ],
+    reviewer_label: Annotated[
+        str | None,
+        typer.Option(help="Override reviewer label for imported records."),
+    ] = None,
+    experiment_id: Annotated[
+        str | None,
+        typer.Option(help="Optional experiment UUID for resolving qa_id-based fixtures."),
+    ] = None,
+) -> None:
+    """Import MedEval v1 manual review records from JSON."""
+    with SessionLocal() as db:
+        try:
+            result = human_review_service.import_reviews(
+                db,
+                path,
+                reviewer_label=reviewer_label,
+                experiment_id=_parse_uuid(experiment_id) if experiment_id else None,
+            )
+        except (ReviewValidationError, ValueError) as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    typer.echo(
+        "Reviews imported: "
+        f"{result['imported']}; updated: {result['updated']}; skipped: {result['skipped']}"
+    )
+
+
+@app.command("export-review-summary")
+def export_review_summary(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+    format: Annotated[
+        str,
+        typer.Option(help="Summary format: markdown, json, or csv."),
+    ] = "markdown",
+    out: Annotated[
+        Path,
+        typer.Option(help="Output review summary path."),
+    ] = Path("../reports/medeval_v1_review_summary.md"),
+) -> None:
+    """Export MedEval v1 manual-review calibration summary."""
+    with SessionLocal() as db:
+        try:
+            summary = human_review_service.build_review_summary(db, _parse_uuid(experiment_id))
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if format == "markdown":
+        out.write_text(summary["markdown"], encoding="utf-8")
+    elif format == "json":
+        out.write_text(_json_report(summary), encoding="utf-8")
+    elif format == "csv":
+        out.write_text(human_review_service.review_summary_csv(summary), encoding="utf-8")
+    else:
+        raise typer.BadParameter("format must be markdown, json, or csv")
+    typer.echo(f"Wrote {format} review summary to {out}")
 
 
 def _document_type_for_path(path: Path) -> str:
