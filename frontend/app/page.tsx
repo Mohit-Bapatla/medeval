@@ -65,7 +65,8 @@ export default function Home() {
         </p>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-graphite">
           Measure hallucinations, citation grounding, refusal behavior, retrieval quality, latency,
-          and cost across reproducible RAG experiments on synthetic healthcare QA datasets.
+          and cost across reproducible RAG experiments on public healthcare sources and synthetic
+          demo fixtures.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {[
@@ -194,7 +195,7 @@ export default function Home() {
                 />
               )}
 
-              <DisclaimerCallout message="All metrics shown are computed from locally seeded synthetic data. Results are deterministic and reproducible but are not validated benchmark scores, clinical ground truth, or production system measurements." />
+              <DisclaimerCallout message="All metrics shown are computed from locally seeded data, including the in-development MedEval v1 public healthcare seed. Results are deterministic and reproducible but are not clinical validation, medical advice, or production system measurements." />
             </>
           ) : null}
         </section>

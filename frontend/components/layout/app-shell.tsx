@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <p className="mt-3 text-xs leading-5 text-graphite">
             Healthcare RAG evaluation &amp; reliability platform. Measures
-            hallucinations, citation grounding, and retrieval quality.
+            groundedness, citation quality, refusals, and retrieval quality.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Footer */}
         <div className="border-t border-line px-5 py-4">
           <p className="text-xs leading-5 text-graphite">
-            Synthetic demo data only. No clinical validation. No external
+            Public seed + synthetic demos. No clinical validation. No external
             AI calls.
           </p>
           <a

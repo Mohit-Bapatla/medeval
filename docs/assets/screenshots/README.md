@@ -1,7 +1,8 @@
 # Screenshot Assets
 
-These screenshots show MedEval running with synthetic seeded local data. They do
-not show validated benchmark results, real users, clinical validation, healthcare
+These screenshots show MedEval running locally with synthetic demo data or the
+in-development MedEval v1 public healthcare seed dataset. They do not show
+validated benchmark results, real users, clinical validation, healthcare
 validation, production use, real patient data, or private student data.
 
 ## Files
@@ -18,9 +19,16 @@ validation, production use, real patient data, or private student data.
 - `10-failure-analysis.png` - failure analysis table and counts
 - `11-reports-page.png` - reports page
 - `12-experiment-report-preview.png` - computed experiment report preview
+- `overview-dashboard-v1.png` - overview dashboard with MedEval v1 local counts
+- `experiment-detail-v1.png` - deterministic baseline experiment detail
+- `human-review-dashboard.png` - manual self-review calibration dashboard
+- `human-review-detail.png` - manual review queue/detail view
+- `failure-taxonomy-report.png` - failure analysis dashboard
+- `experiment-comparison-report.png` - reports page with deterministic report links
 
 ## Refresh Guidance
 
-Refresh screenshots only from a local synthetic demo run. Do not use real patient
-data, private student data, or screenshots that imply clinical validation,
-external adoption, production use, or benchmark-grade results.
+Refresh screenshots only from local demo or MedEval v1 public-seed runs. Do not
+use real patient data, private student data, or screenshots that imply clinical
+validation, clinician review, external adoption, production use, or
+benchmark-grade model leaderboard results.

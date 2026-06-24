@@ -212,7 +212,7 @@ export default function FailuresPage() {
 
           <div className="mt-5">
             <DisclaimerCallout
-              message="These failure rows are produced by the deterministic MVP evaluator on synthetic data. Failure labels are heuristic-based, not expert-annotated."
+              message="These failure rows are produced by deterministic local evaluators over seeded data. Failure labels are heuristic diagnostics calibrated by self-review labels, not clinical validation."
               compact
             />
           </div>

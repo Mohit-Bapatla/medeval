@@ -49,7 +49,8 @@ def get_dashboard_summary(db: DbSession) -> DashboardSummary:
         latest_experiment=latest,
         status_note=(
             "Early development dashboard. Metrics reflect only the connected local database; "
-            "sample data is synthetic unless a user imports governed data."
+            "seeded data may include the MedEval v1 public healthcare seed or synthetic demos. "
+            "Results are not clinical validation."
         ),
     )
 
