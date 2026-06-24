@@ -1,0 +1,18 @@
+name: MedEval v1 Public Healthcare Seed - Deterministic Baseline
+dataset_name: MedEval v1 Public Healthcare Seed
+description: In-development public healthcare seed dataset run with the deterministic local provider; not clinically validated.
+model_provider: deterministic_local
+model_name: deterministic-extractive-answer-v1
+embedding_model: deterministic-hash-embedding-384
+retrieval_strategy: vector_similarity
+top_k: 5
+temperature: 0.0
+evaluator_version: "0.2.0"
+notes: In-development public-document seed benchmark; deterministic local provider; not clinically validated; not medical advice.
+metadata:
+  dataset_version: medeval-v1
+  public_healthcare_seed: true
+  deterministic_local_baseline: true
+  not_clinically_validated: true
+  not_medical_advice: true
+  not_benchmark_complete: true

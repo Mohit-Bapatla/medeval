@@ -81,7 +81,7 @@ export default function ReportsPage() {
           </div>
           <div className="mt-5">
             <DisclaimerCallout
-              message="Reports are generated from locally seeded synthetic evaluation data. They are not validated benchmark reports and should not be used for clinical decision-making or external publication without independent validation."
+              message="Reports are generated from local deterministic runs over seeded data, including the MedEval v1 public healthcare seed. They are not clinical validation, medical advice, or a real model leaderboard."
               compact
             />
           </div>

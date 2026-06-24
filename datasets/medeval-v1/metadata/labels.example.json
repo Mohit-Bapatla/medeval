@@ -1,0 +1,21 @@
+[
+  {
+    "qa_id": "qa_000001",
+    "reviewed": false,
+    "reviewer_role": null,
+    "notes": "Example label metadata only; not clinically reviewed."
+  },
+  {
+    "qa_id": "qa_000002",
+    "reviewed": false,
+    "reviewer_role": null,
+    "notes": "Hard subset placeholder; not clinically reviewed."
+  },
+  {
+    "qa_id": "qa_000003",
+    "reviewed": false,
+    "reviewer_role": null,
+    "notes": "Refusal placeholder; not clinically reviewed."
+  }
+]
+

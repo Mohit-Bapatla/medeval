@@ -142,6 +142,7 @@ def serialize_response_row(response: ModelResponse) -> ExperimentResponseRow:
     evaluation = latest_evaluation(response)
     metadata = evaluation.metadata_json if evaluation else {}
     failure_analysis = metadata.get("failure_analysis", {}) if metadata else {}
+    taxonomy = report_export_service.failure_taxonomy_payload(evaluation)
     claim_support = metadata.get("claim_support", {}) if metadata else {}
     return ExperimentResponseRow(
         response_id=response.id,
@@ -159,6 +160,12 @@ def serialize_response_row(response: ModelResponse) -> ExperimentResponseRow:
         failure_reason=failure_analysis.get("failure_reason"),
         retrieval_failure=failure_analysis.get("retrieval_failure"),
         generation_failure=failure_analysis.get("generation_failure"),
+        primary_failure_category=taxonomy.get("primary_failure_category"),
+        failure_categories=taxonomy.get("failure_categories", []),
+        failure_severity=taxonomy.get("severity"),
+        failure_stage=taxonomy.get("failure_stage"),
+        safety_relevant_failure=taxonomy.get("safety_relevant_failure"),
+        diagnostic_notes=taxonomy.get("diagnostic_notes", []),
         claim_count=claim_support.get("claim_count"),
         claim_support_rate=claim_support.get("claim_support_rate"),
         unsupported_claim_rate=claim_support.get("unsupported_claim_rate"),

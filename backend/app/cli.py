@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, select, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
+from app.datasets.validation import dataset_statistics, validate_dataset
 from app.db import base as _base  # noqa: F401
 from app.db.session import SessionLocal
 from app.models.dataset import Dataset
@@ -19,9 +20,12 @@ from app.services.config_service import config_service
 from app.services.dataset_service import dataset_service
 from app.services.embedding_service import get_embedding_provider
 from app.services.experiment_service import experiment_service
+from app.services.human_review_service import ReviewValidationError, human_review_service
 from app.services.ingestion_service import ingestion_service
+from app.services.medeval_v1_seed_service import medeval_v1_seed_service
 from app.services.qa_import_service import qa_import_service
 from app.services.report_export_service import report_export_service
+from app.services.review_packet_service import review_packet_service
 
 app = typer.Typer(help="MedEval deterministic local development CLI.")
 
@@ -50,6 +54,49 @@ def status() -> None:
         typer.echo("Start Postgres with `docker compose up -d db` before seeding or running.")
 
 
+@app.command("validate-dataset")
+def validate_dataset_command(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Filesystem path to a MedEval benchmark dataset directory.",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+        ),
+    ],
+) -> None:
+    """Validate a filesystem benchmark dataset fixture without using the database."""
+    result = validate_dataset(path)
+    if result.ok:
+        typer.echo(
+            f"Dataset valid: {result.dataset_path} "
+            f"({len(result.documents)} docs, {len(result.qa_examples)} QA examples)"
+        )
+        return
+
+    typer.echo(f"Dataset invalid: {result.dataset_path}")
+    for error in result.errors:
+        typer.echo(f"- {error}")
+    raise typer.Exit(code=1)
+
+
+@app.command("dataset-stats")
+def dataset_stats_command(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Filesystem path to a MedEval benchmark dataset directory.",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+        ),
+    ],
+) -> None:
+    """Print lightweight filesystem dataset counts and taxonomy distributions."""
+    typer.echo(_json_report(dataset_statistics(path)))
+
+
 @app.command("seed-docs")
 def seed_docs(
     path: Annotated[
@@ -63,6 +110,16 @@ def seed_docs(
     ],
 ) -> None:
     """Seed, chunk, and embed synthetic sample documents."""
+    medeval_root = path.parent if path.name == "documents" else path
+    if (medeval_root / "metadata" / "docs.json").exists():
+        with SessionLocal() as db:
+            _, created, skipped, chunks = medeval_v1_seed_service.seed_documents(db, medeval_root)
+        typer.echo(
+            "MedEval v1 documents seeded: "
+            f"{created}; skipped existing: {skipped}; chunks created: {chunks}"
+        )
+        return
+
     provider = get_embedding_provider()
     with SessionLocal() as db:
         created = 0
@@ -114,6 +171,46 @@ def seed_docs(
             created += 1
             typer.echo(f"Seeded {sample_file}: {len(chunks)} chunks")
     typer.echo(f"Documents seeded: {created}; skipped existing: {skipped}")
+
+
+@app.command("seed-dataset")
+def seed_dataset(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Path to a validated MedEval filesystem dataset directory.",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+        ),
+    ],
+    dataset_name: Annotated[
+        str,
+        typer.Option(help="Dataset name to create or reuse."),
+    ] = "MedEval v1 Public Healthcare Seed",
+) -> None:
+    """Validate and seed MedEval v1 documents plus real QA splits into the database."""
+    try:
+        with SessionLocal() as db:
+            result = medeval_v1_seed_service.seed_dataset(db, path, dataset_name)
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(f"Dataset: {result.dataset_name} ({result.dataset_id})")
+    typer.echo(
+        f"Documents seeded: {result.documents_seeded}; skipped existing: "
+        f"{result.documents_skipped}; chunks created: {result.chunks_created}"
+    )
+    typer.echo(
+        f"QA examples seeded: {result.qa_examples_seeded}; skipped existing: "
+        f"{result.qa_examples_skipped}"
+    )
+    typer.echo(
+        f"Evidence links created: {result.evidence_links_created}; skipped: "
+        f"{result.evidence_links_skipped}"
+    )
+    typer.echo(f"Splits included: {', '.join(result.splits_included)}")
 
 
 @app.command("seed-qa")
@@ -225,6 +322,264 @@ def export_results(
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(content, encoding="utf-8")
     typer.echo(f"Wrote CSV results to {out}")
+
+
+@app.command("compare-runs")
+def compare_runs(
+    experiment_id: Annotated[
+        list[str],
+        typer.Option(
+            "--experiment-id",
+            help="Completed experiment UUID. Pass this option multiple times.",
+        ),
+    ],
+    format: Annotated[
+        str,
+        typer.Option(help="Comparison format: markdown, json, or csv."),
+    ] = "markdown",
+    out: Annotated[
+        Path,
+        typer.Option(help="Output file path."),
+    ] = Path("../reports/medeval_v1_comparison_report.md"),
+) -> None:
+    """Compare completed deterministic experiment runs."""
+    if len(experiment_id) < 2:
+        raise typer.BadParameter("Provide at least two --experiment-id values")
+    experiment_ids = [_parse_uuid(value) for value in experiment_id]
+    with SessionLocal() as db:
+        try:
+            comparison = report_export_service.build_comparison_report(db, experiment_ids)
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if format == "markdown":
+        out.write_text(comparison["markdown"], encoding="utf-8")
+    elif format == "json":
+        out.write_text(_json_report(comparison), encoding="utf-8")
+    elif format == "csv":
+        out.write_text(report_export_service.comparison_csv(comparison), encoding="utf-8")
+    else:
+        raise typer.BadParameter("format must be markdown, json, or csv")
+    typer.echo(f"Wrote {format} comparison report to {out}")
+
+
+@app.command("export-review-queue")
+def export_review_queue(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+    out: Annotated[
+        Path,
+        typer.Option(help="Output review queue JSON path."),
+    ] = Path("../reports/medeval_v1_review_queue.json"),
+) -> None:
+    """Export a MedEval v1 manual review queue with automated diagnostics."""
+    with SessionLocal() as db:
+        try:
+            queue = human_review_service.build_review_queue(db, _parse_uuid(experiment_id))
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_json_report(queue), encoding="utf-8")
+    typer.echo(f"Wrote review queue to {out}")
+
+
+@app.command("export-review-packet")
+def export_review_packet(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+    out: Annotated[
+        Path,
+        typer.Option(help="Output review packet path."),
+    ] = Path("../reports/medeval_v1_review_packet_50.pending.json"),
+    format: Annotated[
+        str,
+        typer.Option(help="Packet format: json, markdown, or csv."),
+    ] = "json",
+    limit: Annotated[int, typer.Option(help="Maximum packet item count.")] = 50,
+    strategy: Annotated[
+        str,
+        typer.Option(help="Selection strategy: failure_priority, random, or balanced."),
+    ] = "failure_priority",
+    seed: Annotated[
+        int | None,
+        typer.Option(help="Optional random seed for random strategy."),
+    ] = None,
+) -> None:
+    """Export a curated pending manual-review packet."""
+    with SessionLocal() as db:
+        try:
+            packet = review_packet_service.build_packet(
+                db,
+                _parse_uuid(experiment_id),
+                limit=limit,
+                strategy=strategy,
+                seed=seed,
+            )
+        except (ReviewValidationError, ValueError) as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if format == "json":
+        out.write_text(review_packet_service.packet_json(packet), encoding="utf-8")
+    elif format == "markdown":
+        out.write_text(review_packet_service.packet_markdown(packet), encoding="utf-8")
+    elif format == "csv":
+        out.write_text(review_packet_service.packet_csv(packet), encoding="utf-8")
+    else:
+        raise typer.BadParameter("format must be json, markdown, or csv")
+    typer.echo(
+        f"Wrote {format} review packet to {out} "
+        f"({len(packet['items'])} pending items; strategy={strategy})"
+    )
+
+
+@app.command("validate-review-packet")
+def validate_review_packet(
+    path: Annotated[
+        Path,
+        typer.Option(help="Review packet JSON path.", exists=True, file_okay=True, dir_okay=False),
+    ],
+) -> None:
+    """Validate a pending or completed MedEval v1 review packet."""
+    db_checked = True
+    try:
+        with SessionLocal() as db:
+            result = review_packet_service.validate_packet(path, db=db)
+    except SQLAlchemyError:
+        db_checked = False
+        try:
+            result = review_packet_service.validate_packet(path, db=None)
+        except ReviewValidationError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    except ReviewValidationError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    typer.echo(
+        "Review packet valid: "
+        f"{result['item_count']} items; completed: {result['completed_count']}; "
+        f"pending: {result['pending_count']}; skipped: {result['skipped_count']}"
+    )
+    if not db_checked:
+        typer.echo("Database unavailable; response/evaluation existence checks were skipped.")
+
+
+@app.command("import-review-packet")
+def import_review_packet(
+    path: Annotated[
+        Path,
+        typer.Option(
+            help="Completed review packet JSON path.",
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+        ),
+    ],
+    reviewer_label: Annotated[
+        str | None,
+        typer.Option(help="Override reviewer label for imported packet items."),
+    ] = None,
+    include_pending: Annotated[
+        bool,
+        typer.Option(help="Import pending packet items as pending review records."),
+    ] = False,
+) -> None:
+    """Validate and import completed items from a MedEval v1 review packet."""
+    with SessionLocal() as db:
+        try:
+            result = review_packet_service.import_packet(
+                db,
+                path,
+                reviewer_label=reviewer_label,
+                include_pending=include_pending,
+            )
+        except ReviewValidationError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    typer.echo(
+        "Review packet import: "
+        f"imported: {result['imported']}; updated existing: {result['updated']}; "
+        f"skipped pending: {result['skipped_pending']}; invalid: {result['invalid']}"
+    )
+
+
+@app.command("import-reviews")
+def import_reviews(
+    path: Annotated[
+        Path,
+        typer.Option(help="Review JSON path.", exists=True, file_okay=True, dir_okay=False),
+    ],
+    reviewer_label: Annotated[
+        str | None,
+        typer.Option(help="Override reviewer label for imported records."),
+    ] = None,
+    experiment_id: Annotated[
+        str | None,
+        typer.Option(help="Optional experiment UUID for resolving qa_id-based fixtures."),
+    ] = None,
+) -> None:
+    """Import MedEval v1 manual review records from JSON."""
+    with SessionLocal() as db:
+        try:
+            result = human_review_service.import_reviews(
+                db,
+                path,
+                reviewer_label=reviewer_label,
+                experiment_id=_parse_uuid(experiment_id) if experiment_id else None,
+            )
+        except (ReviewValidationError, ValueError) as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    typer.echo(
+        "Reviews imported: "
+        f"{result['imported']}; updated: {result['updated']}; skipped: {result['skipped']}"
+    )
+
+
+@app.command("review-progress")
+def review_progress(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+) -> None:
+    """Print manual review progress and calibration availability for an experiment."""
+    with SessionLocal() as db:
+        try:
+            progress = review_packet_service.review_progress(db, _parse_uuid(experiment_id))
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    typer.echo(_json_report(progress))
+
+
+@app.command("export-review-summary")
+def export_review_summary(
+    experiment_id: Annotated[str, typer.Option(help="Experiment UUID.")],
+    format: Annotated[
+        str,
+        typer.Option(help="Summary format: markdown, json, or csv."),
+    ] = "markdown",
+    out: Annotated[
+        Path,
+        typer.Option(help="Output review summary path."),
+    ] = Path("../reports/medeval_v1_review_summary.md"),
+) -> None:
+    """Export MedEval v1 manual-review calibration summary."""
+    with SessionLocal() as db:
+        try:
+            summary = human_review_service.build_review_summary(db, _parse_uuid(experiment_id))
+        except ValueError as exc:
+            typer.echo(str(exc))
+            raise typer.Exit(code=1) from exc
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if format == "markdown":
+        out.write_text(summary["markdown"], encoding="utf-8")
+    elif format == "json":
+        out.write_text(_json_report(summary), encoding="utf-8")
+    elif format == "csv":
+        out.write_text(human_review_service.review_summary_csv(summary), encoding="utf-8")
+    else:
+        raise typer.BadParameter("format must be markdown, json, or csv")
+    typer.echo(f"Wrote {format} review summary to {out}")
 
 
 def _document_type_for_path(path: Path) -> str:

@@ -1,0 +1,20 @@
+name: MedEval v1 Public Healthcare Seed - Clean Context Deterministic
+dataset_name: MedEval v1 Public Healthcare Seed
+description: In-development public healthcare seed dataset run with deterministic local provider and cleaned retrieved context; not clinically validated.
+model_provider: deterministic_local
+model_name: deterministic-extractive-answer-v1-clean-context
+embedding_model: deterministic-hash-embedding-384
+retrieval_strategy: vector_similarity
+top_k: 5
+temperature: 0.0
+evaluator_version: "0.2.0"
+notes: Deterministic local comparison config that strips frontmatter and source metadata lines from retrieved context before answer generation.
+metadata:
+  dataset_version: medeval-v1
+  public_healthcare_seed: true
+  deterministic_clean_context: true
+  comparison_variant: clean_context
+  not_clinically_validated: true
+  not_medical_advice: true
+  not_benchmark_complete: true
+

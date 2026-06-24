@@ -1,0 +1,21 @@
+name: MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control
+dataset_name: MedEval v1 Public Healthcare Seed
+description: In-development public healthcare seed dataset run with a metadata-assisted deterministic refusal oracle; not clinically validated.
+model_provider: deterministic_local
+model_name: deterministic-extractive-answer-v1-refusal-oracle
+embedding_model: deterministic-hash-embedding-384
+retrieval_strategy: vector_similarity
+top_k: 5
+temperature: 0.0
+evaluator_version: "0.2.0"
+notes: Metadata-assisted deterministic refusal control. Uses QA requires_refusal metadata for refusal examples; useful as a debugging control, not a real model benchmark.
+metadata:
+  dataset_version: medeval-v1
+  public_healthcare_seed: true
+  deterministic_refusal_oracle: true
+  metadata_assisted_refusal_control: true
+  comparison_variant: refusal_aware_oracle
+  not_clinically_validated: true
+  not_medical_advice: true
+  not_benchmark_complete: true
+

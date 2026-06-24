@@ -56,6 +56,12 @@ class ExperimentResponseRow(BaseModel):
     failure_reason: str | None = None
     retrieval_failure: bool | None = None
     generation_failure: bool | None = None
+    primary_failure_category: str | None = None
+    failure_categories: list[str] = []
+    failure_severity: str | None = None
+    failure_stage: str | None = None
+    safety_relevant_failure: bool | None = None
+    diagnostic_notes: list[str] = []
     claim_count: int | None = None
     claim_support_rate: float | None = None
     unsupported_claim_rate: float | None = None

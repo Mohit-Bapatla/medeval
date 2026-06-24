@@ -45,6 +45,9 @@ def test_experiment_responses_failures_report_and_trace(client: TestClient) -> N
         assert "secondary_failure_types" in failure_rows[0]
         assert "retrieval_failure" in failure_rows[0]
         assert "generation_failure" in failure_rows[0]
+        assert "primary_failure_category" in failure_rows[0]
+        assert "failure_categories" in failure_rows[0]
+        assert "failure_severity" in failure_rows[0]
 
     trace = client.get(f"/api/v1/responses/{response_id}/trace")
     assert trace.status_code == 200
@@ -59,4 +62,4 @@ def test_experiment_responses_failures_report_and_trace(client: TestClient) -> N
     report = client.get(f"/api/v1/experiments/{experiment_id}/report")
     assert report.status_code == 200
     assert "MedEval Experiment Report" in report.json()["markdown"]
-    assert "not validated benchmarks" in report.json()["disclaimer"]
+    assert "not a validated benchmark" in report.json()["disclaimer"]

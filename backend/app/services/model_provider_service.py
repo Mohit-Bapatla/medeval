@@ -33,7 +33,9 @@ class AnswerProvider(Protocol):
 
 class DeterministicAnswerProvider:
     provider_name = "deterministic_local"
-    model_name = "deterministic-extractive-answer-v1"
+
+    def __init__(self, model_name: str = "deterministic-extractive-answer-v1") -> None:
+        self.model_name = model_name
 
     def answer(
         self, question: str, retrieved_chunks: list[RetrievedChunk], prompt_text: str
@@ -132,9 +134,12 @@ class AnthropicAnswerProvider:
         raise NotImplementedError("Anthropic answer generation is not implemented in Batch 2.")
 
 
-def get_answer_provider(provider_name: str = "deterministic_local") -> AnswerProvider:
+def get_answer_provider(
+    provider_name: str = "deterministic_local",
+    model_name: str = "deterministic-extractive-answer-v1",
+) -> AnswerProvider:
     if provider_name != "deterministic_local":
         raise NotImplementedError(
-            "Only deterministic_local answer generation is available in Batch 2."
+            "Only deterministic_local answer generation is available."
         )
-    return DeterministicAnswerProvider()
+    return DeterministicAnswerProvider(model_name=model_name)

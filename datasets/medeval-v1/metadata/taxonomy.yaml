@@ -1,0 +1,49 @@
+categories:
+  - eligibility
+  - required_documents
+  - deadlines
+  - step_by_step_process
+  - benefits_services
+  - restrictions_exclusions
+  - location_contact
+  - privacy_safety
+  - clinical_caution
+  - multi_hop
+  - ambiguous
+  - unsupported
+  - out_of_scope
+  - contradiction_sensitive
+  - temporal_versioned
+
+difficulty_levels:
+  - easy
+  - medium
+  - hard
+
+answer_types:
+  - extractive
+  - abstractive
+  - list
+  - multi_hop
+  - refusal
+  - comparison
+  - temporal
+
+source_types:
+  - public_health_guidance
+  - patient_education
+  - federal_policy
+  - state_policy
+  - clinical_trial
+  - drug_device_safety
+  - insurance_program
+  - nonprofit_program
+  - synthetic_scenario
+
+unsupported_reasons:
+  - not_in_sources
+  - out_of_scope
+  - ambiguous_question
+  - privacy_sensitive
+  - unsafe_medical_advice
+

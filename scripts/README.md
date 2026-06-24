@@ -48,3 +48,23 @@ cd backend
 ```
 
 The CLI uses deterministic local providers and synthetic sample data only.
+
+## MedEval v1 Reproducibility Smoke
+
+`run_medeval_v1_smoke.sh` regenerates the MedEval v1 deterministic baseline and
+comparison report artifacts from a local Postgres-backed setup, then runs the
+report checker.
+
+```bash
+./scripts/run_medeval_v1_smoke.sh
+```
+
+`check_medeval_v1_reports.py` validates the checked-in MedEval v1 report
+artifact structure without asserting exact metric values.
+
+```bash
+python3 scripts/check_medeval_v1_reports.py
+```
+
+These scripts use deterministic local providers and the in-development public
+healthcare seed dataset. They are not clinical validation or medical advice.

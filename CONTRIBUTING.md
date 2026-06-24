@@ -64,3 +64,22 @@ Please include:
 Accepted demo data should be synthetic, clearly labeled, and safe to share in a
 public repository. Do not submit real patient data, private student data, or
 data copied from systems without explicit permission and governance.
+
+## MedEval v1 Dataset Contributions
+
+MedEval v1 dataset contributions must be conservative and auditable:
+
+- use public healthcare sources only;
+- include source URLs, publishers, access dates, and licensing/access notes;
+- avoid PHI, real patient records, private student data, and private
+  organization data;
+- avoid protected textbooks, paywalled clinical resources, and unclear reuse
+  terms;
+- include exact evidence spans for QA examples;
+- keep refusal cases honest about what the source does not support;
+- do not add unsupported claims, fake metrics, fake review labels, or clinical
+  validation language;
+- run dataset validation before opening a pull request.
+
+Public-source summaries should be concise, attributed, and suitable for
+evaluation development. They should not be presented as medical advice.
