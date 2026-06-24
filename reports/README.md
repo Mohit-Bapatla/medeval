@@ -16,10 +16,11 @@ artifacts for the in-development MedEval v1 public healthcare seed dataset:
 - `medeval_v1_comparison_report.json`
 - `medeval_v1_comparison_results.csv`
 
-These artifacts were generated from local Postgres-backed deterministic runs
-over 14 public healthcare documents and 92 evidence-linked QA examples. The
-comparison report includes four deterministic configs: baseline, clean-context,
-metadata-assisted refusal control, and clean-context refusal control.
+These artifacts are generated from local Postgres-backed deterministic runs.
+After Batch 11, the current MedEval v1 dataset contains 25 public healthcare
+documents and 230 evidence-linked QA examples. The comparison report includes
+four deterministic configs: baseline, clean-context, metadata-assisted refusal
+control, and clean-context refusal control.
 
 The reports include aggregate metrics, legacy `failure_type` counts, rich
 failure category counts, failure stage counts, severity counts, safety-relevant

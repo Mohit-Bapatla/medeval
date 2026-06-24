@@ -6,12 +6,13 @@ MedEval v1 is currently an in-development dataset scaffold with a small seed set
 of real public healthcare source documents. It is not a completed benchmark and
 does not contain validated benchmark results.
 
-Current Batch 7 contents:
+Current Batch 11 contents:
 
-- 14 concise public-document seed files
+- 25 concise public-document seed files
 - source metadata in `datasets/medeval-v1/metadata/docs.json`
 - controlled taxonomy metadata
-- 92 real evidence-linked QA examples
+- 230 real evidence-linked QA examples
+- 190 answerable examples and 40 refusal/unsupported examples
 - 3 small QA example fixtures kept separate from real dataset stats
 - deterministic local baseline config and seed command support
 - deterministic local comparison configs and `compare-runs` reporting
@@ -29,8 +30,8 @@ clinical decision support system, diagnostic tool, or source of medical advice.
 ## Data Sources
 
 The current seed set uses public, non-sensitive healthcare sources from CDC,
-NIH/NLM MedlinePlus, FDA, CMS, Medicare.gov, HHS Office for Civil Rights, and
-ClinicalTrials.gov / NIH NLM.
+NIH/NLM MedlinePlus, FDA, CMS, Medicare.gov, Medicaid.gov, HHS Office for Civil
+Rights, and ClinicalTrials.gov / NIH NLM.
 
 Current source categories represented:
 
@@ -55,10 +56,21 @@ testing. External-provider benchmark runs are future batches.
 
 Current real QA split counts:
 
-- `qa_eval.jsonl`: 60
-- `qa_hard.jsonl`: 15
-- `qa_refusal.jsonl`: 17
-- total real QA examples: 92
+- `qa_eval.jsonl`: 150
+- `qa_hard.jsonl`: 40
+- `qa_refusal.jsonl`: 40
+- total real QA examples: 230
+
+Current distributions:
+
+- Category counts: ambiguous 13, benefits/services 34, clinical caution 40,
+  contradiction-sensitive 4, deadlines 7, eligibility 17, location/contact 6,
+  multi-hop 19, out-of-scope 12, privacy/safety 21, required documents 4,
+  restrictions/exclusions 22, step-by-step process 11, temporal/versioned 12,
+  unsupported 8
+- Difficulty counts: easy 52, medium 105, hard 73
+- Answer type counts: extractive 100, list 33, comparison 19, multi-hop 20,
+  abstractive 13, temporal 5, refusal 40
 
 ## Annotation Design
 

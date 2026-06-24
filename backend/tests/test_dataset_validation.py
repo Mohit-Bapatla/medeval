@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import shutil
 from pathlib import Path
@@ -19,19 +20,48 @@ def _write_jsonl(path: Path, records: list[dict]) -> None:
     path.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
 
 
+def _load_qa_builder():
+    module_path = REPO_ROOT / "scripts" / "build_medeval_v1_qa.py"
+    spec = importlib.util.spec_from_file_location("build_medeval_v1_qa", module_path)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def test_medeval_v1_example_dataset_validates() -> None:
     result = validate_dataset(MEDEVAL_V1_PATH)
 
     assert result.ok, result.errors
-    assert len(result.documents) == 14
+    assert len(result.documents) == 25
     assert len(result.example_documents) == 1
-    assert len(result.qa_examples) == 92
+    assert len(result.qa_examples) == 230
     assert len(result.example_qa_examples) == 3
     assert {example.qa_id for example in result.example_qa_examples} == {
         "qa_000001",
         "qa_000002",
         "qa_000003",
     }
+
+
+def test_medeval_v1_qa_builder_generates_current_split_counts() -> None:
+    builder = _load_qa_builder()
+    splits = {
+        "qa_eval.jsonl": builder.build_eval_examples(),
+        "qa_hard.jsonl": builder.build_hard_examples(),
+        "qa_refusal.jsonl": builder.build_refusal_examples(),
+    }
+    builder.apply_label_overrides(splits)
+    builder.validate_records(splits)
+
+    assert {split_name: len(records) for split_name, records in splits.items()} == {
+        "qa_eval.jsonl": 150,
+        "qa_hard.jsonl": 40,
+        "qa_refusal.jsonl": 40,
+    }
+    assert len([record for records in splits.values() for record in records]) == 230
+    assert splits["qa_eval.jsonl"][0]["gold_evidence_spans"][0]["start_char"] >= 0
 
 
 def test_medeval_v1_real_document_metadata_is_complete() -> None:
@@ -59,25 +89,27 @@ def test_dataset_statistics_counts_real_docs_and_refusal_examples() -> None:
     stats = dataset_statistics(MEDEVAL_V1_PATH)
 
     assert stats["valid"] is True
-    assert stats["document_count"] == 14
+    assert stats["document_count"] == 25
     assert stats["example_document_count"] == 1
-    assert stats["qa_count"] == 92
+    assert stats["qa_count"] == 230
     assert stats["example_qa_count"] == 3
     assert stats["qa_count_by_split"] == {
-        "qa_eval.jsonl": 60,
-        "qa_hard.jsonl": 15,
-        "qa_refusal.jsonl": 17,
+        "qa_eval.jsonl": 150,
+        "qa_hard.jsonl": 40,
+        "qa_refusal.jsonl": 40,
     }
-    assert stats["refusal_count"] == 17
-    assert stats["answerable_count"] == 75
-    assert stats["qa_count_by_category"]["clinical_caution"] == 32
-    assert stats["qa_count_by_answer_type"]["refusal"] == 17
-    assert stats["source_types"]["public_health_guidance"] == 5
-    assert stats["source_types"]["patient_education"] == 2
-    assert stats["source_types"]["drug_device_safety"] == 2
-    assert stats["source_types"]["insurance_program"] == 2
-    assert stats["source_types"]["federal_policy"] == 2
-    assert stats["source_types"]["clinical_trial"] == 1
+    assert stats["refusal_count"] == 40
+    assert stats["answerable_count"] == 190
+    assert stats["qa_count_by_category"]["clinical_caution"] == 40
+    assert stats["qa_count_by_category"]["privacy_safety"] == 21
+    assert stats["qa_count_by_answer_type"]["refusal"] == 40
+    assert stats["qa_count_by_answer_type"]["multi_hop"] == 20
+    assert stats["source_types"]["public_health_guidance"] == 9
+    assert stats["source_types"]["patient_education"] == 4
+    assert stats["source_types"]["drug_device_safety"] == 3
+    assert stats["source_types"]["insurance_program"] == 4
+    assert stats["source_types"]["federal_policy"] == 3
+    assert stats["source_types"]["clinical_trial"] == 2
 
 
 def test_dataset_validation_rejects_unknown_category(tmp_path) -> None:
@@ -187,6 +219,6 @@ def test_cli_validate_dataset_and_stats_smoke() -> None:
     assert validate_result.exit_code == 0, validate_result.output
     assert "Dataset valid" in validate_result.output
     assert stats_result.exit_code == 0, stats_result.output
-    assert '"qa_count": 92' in stats_result.output
+    assert '"qa_count": 230' in stats_result.output
     assert '"example_qa_count": 3' in stats_result.output
-    assert '"document_count": 14' in stats_result.output
+    assert '"document_count": 25' in stats_result.output

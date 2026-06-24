@@ -156,7 +156,7 @@ See [docs/benchmark-card.md](docs/benchmark-card.md).
 ## MedEval v1 Public Healthcare Seed
 
 The repository also includes an in-development MedEval v1 public healthcare
-seed dataset with 14 public source documents and 92 evidence-linked QA
+seed dataset with 25 public source documents and 230 evidence-linked QA
 examples. Current deterministic local report artifacts are available under
 `reports/`, including a baseline report and a four-config comparison with
 heuristic rich failure diagnostics.

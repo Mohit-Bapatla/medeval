@@ -1,8 +1,8 @@
 {
   "metadata": {
     "report_type": "deterministic_experiment_comparison",
-    "generated_at": "2026-06-24T01:55:33.013741+00:00",
-    "baseline_experiment_id": "cb5c7d8d-0eb1-43e2-b402-3a54163199f9",
+    "generated_at": "2026-06-24T05:48:02.346876+00:00",
+    "baseline_experiment_id": "11eede9a-e3e5-4d7b-8d02-09b439d30701",
     "experiment_count": 4,
     "disclaimer": "This report is computed from a local deterministic run over the connected database, including synthetic samples or the in-development MedEval v1 public healthcare seed dataset. It is not a validated benchmark, clinical validation, medical advice, healthcare validation, production-use evidence, or an external adoption claim.",
     "limitations": [
@@ -13,8 +13,8 @@
   },
   "experiments": [
     {
-      "experiment_id": "cb5c7d8d-0eb1-43e2-b402-3a54163199f9",
-      "experiment_id_short": "cb5c7d8d",
+      "experiment_id": "11eede9a-e3e5-4d7b-8d02-09b439d30701",
+      "experiment_id_short": "11eede9a",
       "name": "MedEval v1 Public Healthcare Seed - Deterministic Baseline",
       "status": "completed",
       "model_provider": "deterministic_local",
@@ -32,15 +32,15 @@
         "config_source": "yaml"
       },
       "metrics": {
-        "examples": 92,
-        "avg_correctness": 0.2924388388789648,
-        "avg_groundedness": 0.9891304347826086,
-        "citation_precision": 0.8,
-        "citation_recall": 0.9066666666666666,
-        "retrieval_precision": 0.18043478260869567,
-        "retrieval_recall": 0.9755555555555556,
-        "refusal_accuracy": 0.8695652173913043,
-        "hallucination_rate": 0.13043478260869565,
+        "examples": 230,
+        "avg_correctness": 0.2953656794768165,
+        "avg_groundedness": 0.9956521739130435,
+        "citation_precision": 0.7431818181818182,
+        "citation_recall": 0.8473684210526315,
+        "retrieval_precision": 0.18608695652173915,
+        "retrieval_recall": 0.9438596491228071,
+        "refusal_accuracy": 0.8608695652173913,
+        "hallucination_rate": 0.1391304347826087,
         "avg_latency_ms": 0.0,
         "total_estimated_cost": 0.0
       },
@@ -53,45 +53,49 @@
         "hallucination_rate_delta": 0.0
       },
       "failure_type_counts": {
-        "wrong_answer": 45,
-        "evaluator_insufficient_data": 6,
-        "bad_citation": 8,
-        "partial_answer": 16,
-        "none": 3,
-        "failed_to_refuse": 11,
-        "missing_citation": 2,
-        "over_refusal": 1
+        "wrong_answer": 96,
+        "partial_answer": 40,
+        "bad_citation": 27,
+        "none": 14,
+        "missing_citation": 10,
+        "evaluator_insufficient_data": 9,
+        "over_refusal": 1,
+        "failed_to_refuse": 31,
+        "retrieval_miss": 2
       },
       "rich_failure_category_counts": {
-        "format_failure": 6,
-        "failed_refusal": 11,
-        "citation_mismatch": 21,
-        "temporal_failure": 3,
-        "bad_synthesis": 45,
-        "retrieval_rank_failure": 6,
-        "context_overload": 68,
-        "missing_citation": 3,
-        "over_refusal": 1,
-        "incomplete_answer": 16
+        "format_failure": 9,
+        "failed_refusal": 31,
+        "citation_mismatch": 70,
+        "temporal_failure": 12,
+        "bad_synthesis": 96,
+        "context_overload": 157,
+        "retrieval_rank_failure": 20,
+        "incomplete_answer": 40,
+        "retrieval_miss": 3,
+        "missing_citation": 13,
+        "over_answering": 1,
+        "over_refusal": 1
       },
       "failure_stage_counts": {
-        "format": 6,
-        "refusal": 12,
-        "synthesis": 45,
-        "citation": 10,
-        "generation": 16
+        "format": 9,
+        "refusal": 32,
+        "synthesis": 96,
+        "generation": 40,
+        "citation": 37,
+        "retrieval": 2
       },
       "failure_severity_counts": {
-        "low": 6,
-        "critical": 11,
-        "high": 45,
-        "medium": 27
+        "low": 9,
+        "critical": 31,
+        "high": 99,
+        "medium": 77
       },
-      "safety_relevant_failure_count": 56
+      "safety_relevant_failure_count": 127
     },
     {
-      "experiment_id": "a0145407-b567-46ac-ac0d-8a5bbfb262c6",
-      "experiment_id_short": "a0145407",
+      "experiment_id": "47162b10-d6fe-4f61-a7ea-914acc7b0e36",
+      "experiment_id_short": "47162b10",
       "name": "MedEval v1 Public Healthcare Seed - Clean Context Deterministic",
       "status": "completed",
       "model_provider": "deterministic_local",
@@ -110,66 +114,70 @@
         "config_source": "yaml"
       },
       "metrics": {
-        "examples": 92,
-        "avg_correctness": 0.3368957525263819,
-        "avg_groundedness": 0.9891304347826086,
-        "citation_precision": 0.8095238095238095,
-        "citation_recall": 0.9,
-        "retrieval_precision": 0.18043478260869567,
-        "retrieval_recall": 0.9755555555555556,
-        "refusal_accuracy": 0.8804347826086957,
-        "hallucination_rate": 0.11956521739130435,
+        "examples": 230,
+        "avg_correctness": 0.33462678488592523,
+        "avg_groundedness": 0.991304347826087,
+        "citation_precision": 0.7385321100917431,
+        "citation_recall": 0.8429824561403508,
+        "retrieval_precision": 0.18608695652173915,
+        "retrieval_recall": 0.9438596491228071,
+        "refusal_accuracy": 0.8608695652173913,
+        "hallucination_rate": 0.1391304347826087,
         "avg_latency_ms": 0.0,
         "total_estimated_cost": 0.0
       },
       "deltas_vs_baseline": {
-        "avg_correctness_delta": 0.04445691364741705,
-        "avg_groundedness_delta": 0.0,
-        "citation_recall_delta": -0.006666666666666599,
+        "avg_correctness_delta": 0.03926110540910871,
+        "avg_groundedness_delta": -0.004347826086956497,
+        "citation_recall_delta": -0.004385964912280715,
         "retrieval_recall_delta": 0.0,
-        "refusal_accuracy_delta": 0.010869565217391353,
-        "hallucination_rate_delta": -0.010869565217391297
+        "refusal_accuracy_delta": 0.0,
+        "hallucination_rate_delta": 0.0
       },
       "failure_type_counts": {
-        "bad_citation": 8,
-        "wrong_answer": 42,
-        "partial_answer": 18,
-        "none": 4,
-        "missing_citation": 2,
-        "over_refusal": 1,
-        "failed_to_refuse": 10,
-        "evaluator_insufficient_data": 7
+        "evaluator_insufficient_data": 10,
+        "partial_answer": 48,
+        "wrong_answer": 82,
+        "bad_citation": 30,
+        "none": 16,
+        "missing_citation": 10,
+        "over_refusal": 2,
+        "failed_to_refuse": 30,
+        "retrieval_miss": 2
       },
       "rich_failure_category_counts": {
-        "format_failure": 7,
-        "failed_refusal": 10,
-        "citation_mismatch": 20,
-        "temporal_failure": 3,
-        "bad_synthesis": 42,
-        "retrieval_rank_failure": 6,
-        "context_overload": 67,
-        "missing_citation": 3,
-        "over_refusal": 1,
-        "incomplete_answer": 18
+        "format_failure": 10,
+        "failed_refusal": 30,
+        "citation_mismatch": 72,
+        "temporal_failure": 12,
+        "incomplete_answer": 48,
+        "context_overload": 153,
+        "bad_synthesis": 82,
+        "retrieval_rank_failure": 20,
+        "missing_citation": 14,
+        "retrieval_miss": 3,
+        "over_refusal": 2,
+        "over_answering": 1
       },
       "failure_stage_counts": {
-        "format": 7,
-        "refusal": 11,
-        "synthesis": 42,
-        "citation": 10,
-        "generation": 18
+        "format": 10,
+        "refusal": 32,
+        "generation": 48,
+        "synthesis": 82,
+        "citation": 40,
+        "retrieval": 2
       },
       "failure_severity_counts": {
-        "low": 7,
-        "critical": 10,
-        "high": 42,
-        "medium": 29
+        "low": 10,
+        "critical": 30,
+        "medium": 89,
+        "high": 85
       },
-      "safety_relevant_failure_count": 52
+      "safety_relevant_failure_count": 112
     },
     {
-      "experiment_id": "356916bc-ba0f-4ce9-9a7a-f9d1a515114c",
-      "experiment_id_short": "356916bc",
+      "experiment_id": "cfd9bd4a-face-4c83-9e74-253ec6974dcd",
+      "experiment_id_short": "cfd9bd4a",
       "name": "MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control",
       "status": "completed",
       "model_provider": "deterministic_local",
@@ -189,62 +197,65 @@
         "config_source": "yaml"
       },
       "metrics": {
-        "examples": 92,
-        "avg_correctness": 0.4120040562702692,
-        "avg_groundedness": 0.8043478260869565,
-        "citation_precision": 0.918918918918919,
-        "citation_recall": 0.9066666666666666,
-        "retrieval_precision": 0.18043478260869567,
-        "retrieval_recall": 0.9755555555555556,
-        "refusal_accuracy": 0.9891304347826086,
-        "hallucination_rate": 0.1956521739130435,
-        "avg_latency_ms": 0.010869565217391304,
+        "examples": 230,
+        "avg_correctness": 0.4301482881724687,
+        "avg_groundedness": 0.8217391304347826,
+        "citation_precision": 0.8650793650793651,
+        "citation_recall": 0.8473684210526315,
+        "retrieval_precision": 0.18608695652173915,
+        "retrieval_recall": 0.9438596491228071,
+        "refusal_accuracy": 0.9956521739130435,
+        "hallucination_rate": 0.1782608695652174,
+        "avg_latency_ms": 0.008695652173913044,
         "total_estimated_cost": 0.0
       },
       "deltas_vs_baseline": {
-        "avg_correctness_delta": 0.11956521739130438,
-        "avg_groundedness_delta": -0.1847826086956521,
+        "avg_correctness_delta": 0.13478260869565217,
+        "avg_groundedness_delta": -0.17391304347826086,
         "citation_recall_delta": 0.0,
         "retrieval_recall_delta": 0.0,
-        "refusal_accuracy_delta": 0.11956521739130432,
-        "hallucination_rate_delta": 0.06521739130434784
+        "refusal_accuracy_delta": 0.13478260869565217,
+        "hallucination_rate_delta": 0.03913043478260869
       },
       "failure_type_counts": {
+        "partial_answer": 40,
+        "wrong_answer": 96,
+        "bad_citation": 27,
+        "none": 14,
+        "missing_citation": 10,
         "over_refusal": 1,
-        "bad_citation": 8,
-        "wrong_answer": 45,
-        "partial_answer": 16,
-        "none": 3,
-        "missing_citation": 2,
-        "failed_to_refuse": 17
+        "failed_to_refuse": 40,
+        "retrieval_miss": 2
       },
       "rich_failure_category_counts": {
-        "failed_refusal": 17,
-        "missing_citation": 20,
-        "bad_synthesis": 45,
-        "retrieval_rank_failure": 6,
-        "context_overload": 68,
-        "citation_mismatch": 10,
-        "temporal_failure": 2,
-        "over_refusal": 1,
-        "incomplete_answer": 16
+        "failed_refusal": 40,
+        "missing_citation": 53,
+        "bad_synthesis": 96,
+        "context_overload": 157,
+        "retrieval_rank_failure": 20,
+        "incomplete_answer": 40,
+        "temporal_failure": 10,
+        "citation_mismatch": 39,
+        "retrieval_miss": 3,
+        "over_refusal": 1
       },
       "failure_stage_counts": {
-        "refusal": 18,
-        "synthesis": 45,
-        "citation": 10,
-        "generation": 16
+        "refusal": 41,
+        "synthesis": 96,
+        "generation": 40,
+        "citation": 37,
+        "retrieval": 2
       },
       "failure_severity_counts": {
-        "critical": 17,
-        "high": 45,
-        "medium": 27
+        "critical": 40,
+        "high": 99,
+        "medium": 77
       },
-      "safety_relevant_failure_count": 62
+      "safety_relevant_failure_count": 136
     },
     {
-      "experiment_id": "af1415ef-237b-4f4e-a316-1aacaf3c69ad",
-      "experiment_id_short": "af1415ef",
+      "experiment_id": "59d4ee82-9c3b-4d36-a041-72f0bf5e18e5",
+      "experiment_id_short": "59d4ee82",
       "name": "MedEval v1 Public Healthcare Seed - Clean Context Refusal Control",
       "status": "completed",
       "model_provider": "deterministic_local",
@@ -265,60 +276,63 @@
         "config_source": "yaml"
       },
       "metrics": {
-        "examples": 92,
-        "avg_correctness": 0.44559140470029496,
-        "avg_groundedness": 0.8043478260869565,
-        "citation_precision": 0.918918918918919,
-        "citation_recall": 0.9,
-        "retrieval_precision": 0.18043478260869567,
-        "retrieval_recall": 0.9755555555555556,
-        "refusal_accuracy": 0.9891304347826086,
-        "hallucination_rate": 0.1956521739130435,
-        "avg_latency_ms": 0.010869565217391304,
+        "examples": 230,
+        "avg_correctness": 0.46506156749462085,
+        "avg_groundedness": 0.8173913043478261,
+        "citation_precision": 0.8563829787234043,
+        "citation_recall": 0.8429824561403508,
+        "retrieval_precision": 0.18608695652173915,
+        "retrieval_recall": 0.9438596491228071,
+        "refusal_accuracy": 0.991304347826087,
+        "hallucination_rate": 0.1826086956521739,
+        "avg_latency_ms": 0.004347826086956522,
         "total_estimated_cost": 0.0
       },
       "deltas_vs_baseline": {
-        "avg_correctness_delta": 0.15315256582133013,
-        "avg_groundedness_delta": -0.1847826086956521,
-        "citation_recall_delta": -0.006666666666666599,
+        "avg_correctness_delta": 0.16969588801780433,
+        "avg_groundedness_delta": -0.17826086956521736,
+        "citation_recall_delta": -0.004385964912280715,
         "retrieval_recall_delta": 0.0,
-        "refusal_accuracy_delta": 0.11956521739130432,
-        "hallucination_rate_delta": 0.06521739130434784
+        "refusal_accuracy_delta": 0.13043478260869568,
+        "hallucination_rate_delta": 0.043478260869565216
       },
       "failure_type_counts": {
-        "partial_answer": 18,
-        "wrong_answer": 42,
-        "bad_citation": 8,
-        "none": 4,
-        "missing_citation": 2,
-        "over_refusal": 1,
-        "failed_to_refuse": 17
+        "partial_answer": 48,
+        "wrong_answer": 82,
+        "bad_citation": 30,
+        "none": 16,
+        "missing_citation": 10,
+        "over_refusal": 2,
+        "failed_to_refuse": 40,
+        "retrieval_miss": 2
       },
       "rich_failure_category_counts": {
-        "failed_refusal": 17,
-        "missing_citation": 20,
-        "bad_synthesis": 42,
-        "retrieval_rank_failure": 6,
-        "context_overload": 67,
-        "citation_mismatch": 10,
-        "temporal_failure": 2,
-        "over_refusal": 1,
-        "incomplete_answer": 18
+        "failed_refusal": 40,
+        "missing_citation": 54,
+        "incomplete_answer": 48,
+        "context_overload": 153,
+        "bad_synthesis": 82,
+        "retrieval_rank_failure": 20,
+        "citation_mismatch": 42,
+        "temporal_failure": 10,
+        "retrieval_miss": 3,
+        "over_refusal": 2
       },
       "failure_stage_counts": {
-        "refusal": 18,
-        "synthesis": 42,
-        "citation": 10,
-        "generation": 18
+        "refusal": 42,
+        "generation": 48,
+        "synthesis": 82,
+        "citation": 40,
+        "retrieval": 2
       },
       "failure_severity_counts": {
-        "critical": 17,
-        "high": 42,
-        "medium": 29
+        "critical": 40,
+        "medium": 89,
+        "high": 85
       },
-      "safety_relevant_failure_count": 59
+      "safety_relevant_failure_count": 122
     }
   ],
   "disclaimer": "This report is computed from a local deterministic run over the connected database, including synthetic samples or the in-development MedEval v1 public healthcare seed dataset. It is not a validated benchmark, clinical validation, medical advice, healthcare validation, production-use evidence, or an external adoption claim.",
-  "markdown": "# MedEval v1 Deterministic Comparison Report\n\nGenerated: 2026-06-24T01:55:33.013741+00:00\n\n## Disclaimer\n\nThis report is computed from a local deterministic run over the connected database, including synthetic samples or the in-development MedEval v1 public healthcare seed dataset. It is not a validated benchmark, clinical validation, medical advice, healthcare validation, production-use evidence, or an external adoption claim.\n\nThis comparison is a deterministic local debugging/regression workflow for an in-development public healthcare seed dataset. It is not clinical validation, medical advice, or a validated leaderboard.\n\n## Compared Experiments\n\n| Experiment | ID | Status | Model | top_k | Examples |\n| --- | --- | --- | --- | ---: | ---: |\n| MedEval v1 Public Healthcare Seed - Deterministic Baseline | cb5c7d8d | completed | deterministic-extractive-answer-v1 | 5 | 92 |\n| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | a0145407 | completed | deterministic-extractive-answer-v1-clean-context | 5 | 92 |\n| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 356916bc | completed | deterministic-extractive-answer-v1-refusal-oracle | 5 | 92 |\n| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | af1415ef | completed | deterministic-extractive-answer-v1-clean-refusal-oracle | 5 | 92 |\n\n## Aggregate Metrics\n\n| Experiment | Correctness | Groundedness | Citation Precision | Citation Recall | Retrieval Precision | Retrieval Recall | Refusal Accuracy | Hallucination Rate | Avg Latency | Cost |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 0.292 | 0.989 | 0.800 | 0.907 | 0.180 | 0.976 | 0.870 | 0.130 | 0.000 | 0.000 |\n| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 0.337 | 0.989 | 0.810 | 0.900 | 0.180 | 0.976 | 0.880 | 0.120 | 0.000 | 0.000 |\n| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 0.412 | 0.804 | 0.919 | 0.907 | 0.180 | 0.976 | 0.989 | 0.196 | 0.011 | 0.000 |\n| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 0.446 | 0.804 | 0.919 | 0.900 | 0.180 | 0.976 | 0.989 | 0.196 | 0.011 | 0.000 |\n\n## Deltas Vs Baseline\n\n| Experiment | Correctness \u0394 | Groundedness \u0394 | Citation Recall \u0394 | Retrieval Recall \u0394 | Refusal Accuracy \u0394 | Hallucination Rate \u0394 |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n| MedEval v1 Public Healthcare Seed - Deterministic Baseline | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 |\n| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | +0.044 | +0.000 | -0.007 | +0.000 | +0.011 | -0.011 |\n| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | +0.120 | -0.185 | +0.000 | +0.000 | +0.120 | +0.065 |\n| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | +0.153 | -0.185 | -0.007 | +0.000 | +0.120 | +0.065 |\n\n## Failure Type Counts\n\n### MedEval v1 Public Healthcare Seed - Deterministic Baseline\n\n- bad_citation: 8\n- evaluator_insufficient_data: 6\n- failed_to_refuse: 11\n- missing_citation: 2\n- none: 3\n- over_refusal: 1\n- partial_answer: 16\n- wrong_answer: 45\n\n### MedEval v1 Public Healthcare Seed - Clean Context Deterministic\n\n- bad_citation: 8\n- evaluator_insufficient_data: 7\n- failed_to_refuse: 10\n- missing_citation: 2\n- none: 4\n- over_refusal: 1\n- partial_answer: 18\n- wrong_answer: 42\n\n### MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control\n\n- bad_citation: 8\n- failed_to_refuse: 17\n- missing_citation: 2\n- none: 3\n- over_refusal: 1\n- partial_answer: 16\n- wrong_answer: 45\n\n### MedEval v1 Public Healthcare Seed - Clean Context Refusal Control\n\n- bad_citation: 8\n- failed_to_refuse: 17\n- missing_citation: 2\n- none: 4\n- over_refusal: 1\n- partial_answer: 18\n- wrong_answer: 42\n\n## Rich Failure Diagnostics\n\n### MedEval v1 Public Healthcare Seed - Deterministic Baseline\n\nFailure categories:\n- bad_synthesis: 45\n- citation_mismatch: 21\n- context_overload: 68\n- failed_refusal: 11\n- format_failure: 6\n- incomplete_answer: 16\n- missing_citation: 3\n- over_refusal: 1\n- retrieval_rank_failure: 6\n- temporal_failure: 3\n\nFailure stages:\n- citation: 10\n- format: 6\n- generation: 16\n- refusal: 12\n- synthesis: 45\n\nSeverity:\n- critical: 11\n- high: 45\n- low: 6\n- medium: 27\n- Safety-relevant failures: 56\n\n### MedEval v1 Public Healthcare Seed - Clean Context Deterministic\n\nFailure categories:\n- bad_synthesis: 42\n- citation_mismatch: 20\n- context_overload: 67\n- failed_refusal: 10\n- format_failure: 7\n- incomplete_answer: 18\n- missing_citation: 3\n- over_refusal: 1\n- retrieval_rank_failure: 6\n- temporal_failure: 3\n\nFailure stages:\n- citation: 10\n- format: 7\n- generation: 18\n- refusal: 11\n- synthesis: 42\n\nSeverity:\n- critical: 10\n- high: 42\n- low: 7\n- medium: 29\n- Safety-relevant failures: 52\n\n### MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control\n\nFailure categories:\n- bad_synthesis: 45\n- citation_mismatch: 10\n- context_overload: 68\n- failed_refusal: 17\n- incomplete_answer: 16\n- missing_citation: 20\n- over_refusal: 1\n- retrieval_rank_failure: 6\n- temporal_failure: 2\n\nFailure stages:\n- citation: 10\n- generation: 16\n- refusal: 18\n- synthesis: 45\n\nSeverity:\n- critical: 17\n- high: 45\n- medium: 27\n- Safety-relevant failures: 62\n\n### MedEval v1 Public Healthcare Seed - Clean Context Refusal Control\n\nFailure categories:\n- bad_synthesis: 42\n- citation_mismatch: 10\n- context_overload: 67\n- failed_refusal: 17\n- incomplete_answer: 18\n- missing_citation: 20\n- over_refusal: 1\n- retrieval_rank_failure: 6\n- temporal_failure: 2\n\nFailure stages:\n- citation: 10\n- generation: 18\n- refusal: 18\n- synthesis: 42\n\nSeverity:\n- critical: 17\n- high: 42\n- medium: 29\n- Safety-relevant failures: 59\n\n## Notes And Limitations\n\n- Deterministic local comparisons are useful for pipeline debugging and regression testing.\n- Refusal-aware variants may use QA metadata as a deterministic control, or oracle/control, not as a real model capability.\n- Clean-context variants strip frontmatter and source metadata before deterministic answer generation.\n- These reports do not claim real-world performance, clinical validation, production readiness, or external adoption."
+  "markdown": "# MedEval v1 Deterministic Comparison Report\n\nGenerated: 2026-06-24T05:48:02.346876+00:00\n\n## Disclaimer\n\nThis report is computed from a local deterministic run over the connected database, including synthetic samples or the in-development MedEval v1 public healthcare seed dataset. It is not a validated benchmark, clinical validation, medical advice, healthcare validation, production-use evidence, or an external adoption claim.\n\nThis comparison is a deterministic local debugging/regression workflow for an in-development public healthcare seed dataset. It is not clinical validation, medical advice, or a validated leaderboard.\n\n## Compared Experiments\n\n| Experiment | ID | Status | Model | top_k | Examples |\n| --- | --- | --- | --- | ---: | ---: |\n| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 11eede9a | completed | deterministic-extractive-answer-v1 | 5 | 230 |\n| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 47162b10 | completed | deterministic-extractive-answer-v1-clean-context | 5 | 230 |\n| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | cfd9bd4a | completed | deterministic-extractive-answer-v1-refusal-oracle | 5 | 230 |\n| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 59d4ee82 | completed | deterministic-extractive-answer-v1-clean-refusal-oracle | 5 | 230 |\n\n## Aggregate Metrics\n\n| Experiment | Correctness | Groundedness | Citation Precision | Citation Recall | Retrieval Precision | Retrieval Recall | Refusal Accuracy | Hallucination Rate | Avg Latency | Cost |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 0.295 | 0.996 | 0.743 | 0.847 | 0.186 | 0.944 | 0.861 | 0.139 | 0.000 | 0.000 |\n| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 0.335 | 0.991 | 0.739 | 0.843 | 0.186 | 0.944 | 0.861 | 0.139 | 0.000 | 0.000 |\n| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 0.430 | 0.822 | 0.865 | 0.847 | 0.186 | 0.944 | 0.996 | 0.178 | 0.009 | 0.000 |\n| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 0.465 | 0.817 | 0.856 | 0.843 | 0.186 | 0.944 | 0.991 | 0.183 | 0.004 | 0.000 |\n\n## Deltas Vs Baseline\n\n| Experiment | Correctness \u0394 | Groundedness \u0394 | Citation Recall \u0394 | Retrieval Recall \u0394 | Refusal Accuracy \u0394 | Hallucination Rate \u0394 |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n| MedEval v1 Public Healthcare Seed - Deterministic Baseline | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 |\n| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | +0.039 | -0.004 | -0.004 | +0.000 | +0.000 | +0.000 |\n| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | +0.135 | -0.174 | +0.000 | +0.000 | +0.135 | +0.039 |\n| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | +0.170 | -0.178 | -0.004 | +0.000 | +0.130 | +0.043 |\n\n## Failure Type Counts\n\n### MedEval v1 Public Healthcare Seed - Deterministic Baseline\n\n- bad_citation: 27\n- evaluator_insufficient_data: 9\n- failed_to_refuse: 31\n- missing_citation: 10\n- none: 14\n- over_refusal: 1\n- partial_answer: 40\n- retrieval_miss: 2\n- wrong_answer: 96\n\n### MedEval v1 Public Healthcare Seed - Clean Context Deterministic\n\n- bad_citation: 30\n- evaluator_insufficient_data: 10\n- failed_to_refuse: 30\n- missing_citation: 10\n- none: 16\n- over_refusal: 2\n- partial_answer: 48\n- retrieval_miss: 2\n- wrong_answer: 82\n\n### MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control\n\n- bad_citation: 27\n- failed_to_refuse: 40\n- missing_citation: 10\n- none: 14\n- over_refusal: 1\n- partial_answer: 40\n- retrieval_miss: 2\n- wrong_answer: 96\n\n### MedEval v1 Public Healthcare Seed - Clean Context Refusal Control\n\n- bad_citation: 30\n- failed_to_refuse: 40\n- missing_citation: 10\n- none: 16\n- over_refusal: 2\n- partial_answer: 48\n- retrieval_miss: 2\n- wrong_answer: 82\n\n## Rich Failure Diagnostics\n\n### MedEval v1 Public Healthcare Seed - Deterministic Baseline\n\nFailure categories:\n- bad_synthesis: 96\n- citation_mismatch: 70\n- context_overload: 157\n- failed_refusal: 31\n- format_failure: 9\n- incomplete_answer: 40\n- missing_citation: 13\n- over_answering: 1\n- over_refusal: 1\n- retrieval_miss: 3\n- retrieval_rank_failure: 20\n- temporal_failure: 12\n\nFailure stages:\n- citation: 37\n- format: 9\n- generation: 40\n- refusal: 32\n- retrieval: 2\n- synthesis: 96\n\nSeverity:\n- critical: 31\n- high: 99\n- low: 9\n- medium: 77\n- Safety-relevant failures: 127\n\n### MedEval v1 Public Healthcare Seed - Clean Context Deterministic\n\nFailure categories:\n- bad_synthesis: 82\n- citation_mismatch: 72\n- context_overload: 153\n- failed_refusal: 30\n- format_failure: 10\n- incomplete_answer: 48\n- missing_citation: 14\n- over_answering: 1\n- over_refusal: 2\n- retrieval_miss: 3\n- retrieval_rank_failure: 20\n- temporal_failure: 12\n\nFailure stages:\n- citation: 40\n- format: 10\n- generation: 48\n- refusal: 32\n- retrieval: 2\n- synthesis: 82\n\nSeverity:\n- critical: 30\n- high: 85\n- low: 10\n- medium: 89\n- Safety-relevant failures: 112\n\n### MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control\n\nFailure categories:\n- bad_synthesis: 96\n- citation_mismatch: 39\n- context_overload: 157\n- failed_refusal: 40\n- incomplete_answer: 40\n- missing_citation: 53\n- over_refusal: 1\n- retrieval_miss: 3\n- retrieval_rank_failure: 20\n- temporal_failure: 10\n\nFailure stages:\n- citation: 37\n- generation: 40\n- refusal: 41\n- retrieval: 2\n- synthesis: 96\n\nSeverity:\n- critical: 40\n- high: 99\n- medium: 77\n- Safety-relevant failures: 136\n\n### MedEval v1 Public Healthcare Seed - Clean Context Refusal Control\n\nFailure categories:\n- bad_synthesis: 82\n- citation_mismatch: 42\n- context_overload: 153\n- failed_refusal: 40\n- incomplete_answer: 48\n- missing_citation: 54\n- over_refusal: 2\n- retrieval_miss: 3\n- retrieval_rank_failure: 20\n- temporal_failure: 10\n\nFailure stages:\n- citation: 40\n- generation: 48\n- refusal: 42\n- retrieval: 2\n- synthesis: 82\n\nSeverity:\n- critical: 40\n- high: 85\n- medium: 89\n- Safety-relevant failures: 122\n\n## Notes And Limitations\n\n- Deterministic local comparisons are useful for pipeline debugging and regression testing.\n- Refusal-aware variants may use QA metadata as a deterministic control, or oracle/control, not as a real model capability.\n- Clean-context variants strip frontmatter and source metadata before deterministic answer generation.\n- These reports do not claim real-world performance, clinical validation, production readiness, or external adoption."
 }

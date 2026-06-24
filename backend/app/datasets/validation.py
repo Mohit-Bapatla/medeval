@@ -103,6 +103,7 @@ def validate_dataset(dataset_path: Path) -> DatasetValidationResult:
         split_examples = _load_qa_jsonl(root / split_path, errors)
         qa_examples_by_split[split_path.name] = split_examples
         qa_examples.extend(split_examples)
+    _validate_unique_qa_ids_across_splits(qa_examples_by_split, errors, label="real QA")
 
     example_qa_examples: list[BenchmarkQAExample] = []
     for split_path in EXAMPLE_QA_FILES:
@@ -204,6 +205,28 @@ def _validate_unique_doc_ids(
     duplicates = sorted(doc_id for doc_id, count in counts.items() if count > 1)
     if duplicates:
         errors.append(f"{label}: duplicate doc_id values: {', '.join(duplicates)}")
+
+
+def _validate_unique_qa_ids_across_splits(
+    examples_by_split: dict[str, list[BenchmarkQAExample]],
+    errors: list[str],
+    label: str,
+) -> None:
+    locations: dict[str, list[str]] = {}
+    for split_name, examples in examples_by_split.items():
+        for example in examples:
+            locations.setdefault(example.qa_id, []).append(split_name)
+    duplicates = {
+        qa_id: split_names
+        for qa_id, split_names in locations.items()
+        if len(split_names) > 1
+    }
+    if duplicates:
+        details = ", ".join(
+            f"{qa_id} ({'/'.join(split_names)})"
+            for qa_id, split_names in sorted(duplicates.items())
+        )
+        errors.append(f"{label}: duplicate qa_id values across splits: {details}")
 
 
 def _load_document_texts(

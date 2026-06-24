@@ -166,6 +166,137 @@
     "domain": "clinical_trials",
     "difficulty": "hard",
     "document_path": "documents/clinicaltrials_dpp_nct00004992_001.md"
+  },
+  {
+    "doc_id": "cdc_heart_disease_prevention_001",
+    "title": "Preventing Heart Disease",
+    "publisher": "CDC",
+    "source_type": "public_health_guidance",
+    "source_url": "https://www.cdc.gov/heart-disease/prevention/index.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "CDC public health information page. Most CDC/ATSDR website information is public domain; attribute CDC and verify page-specific restrictions before redistribution.",
+    "domain": "cardiovascular_health",
+    "difficulty": "medium",
+    "document_path": "documents/cdc_heart_disease_prevention_001.md"
+  },
+  {
+    "doc_id": "cdc_cancer_screening_001",
+    "title": "Cancer Screening Tests",
+    "publisher": "CDC",
+    "source_type": "public_health_guidance",
+    "source_url": "https://www.cdc.gov/cancer/prevention/screening.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "CDC public health information page. Most CDC/ATSDR website information is public domain; attribute CDC and verify page-specific restrictions before redistribution.",
+    "domain": "cancer_screening",
+    "difficulty": "medium",
+    "document_path": "documents/cdc_cancer_screening_001.md"
+  },
+  {
+    "doc_id": "cdc_pregnancy_vaccines_001",
+    "title": "Vaccine Recommendations Before, During, and After Pregnancy",
+    "publisher": "CDC",
+    "source_type": "public_health_guidance",
+    "source_url": "https://www.cdc.gov/vaccines-pregnancy/recommended-vaccines/index.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "CDC public health information page. Most CDC/ATSDR website information is public domain; attribute CDC and verify page-specific restrictions before redistribution.",
+    "domain": "immunization",
+    "difficulty": "hard",
+    "document_path": "documents/cdc_pregnancy_vaccines_001.md"
+  },
+  {
+    "doc_id": "cdc_norovirus_prevention_001",
+    "title": "How to Prevent Norovirus",
+    "publisher": "CDC",
+    "source_type": "public_health_guidance",
+    "source_url": "https://www.cdc.gov/norovirus/prevention/index.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "CDC public health information page. Most CDC/ATSDR website information is public domain; attribute CDC and verify page-specific restrictions before redistribution.",
+    "domain": "infectious_disease",
+    "difficulty": "medium",
+    "document_path": "documents/cdc_norovirus_prevention_001.md"
+  },
+  {
+    "doc_id": "medlineplus_depression_001",
+    "title": "Depression",
+    "publisher": "NIH/NLM MedlinePlus",
+    "source_type": "patient_education",
+    "source_url": "https://medlineplus.gov/depression.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "MedlinePlus includes public domain and licensed content. This repo stores a concise attribution summary; verify page-specific reuse rules before redistribution.",
+    "domain": "mental_health",
+    "difficulty": "medium",
+    "document_path": "documents/medlineplus_depression_001.md"
+  },
+  {
+    "doc_id": "medlineplus_cholesterol_001",
+    "title": "Cholesterol",
+    "publisher": "NIH/NLM MedlinePlus",
+    "source_type": "patient_education",
+    "source_url": "https://medlineplus.gov/cholesterol.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "MedlinePlus includes public domain and licensed content. This repo stores a concise attribution summary; verify page-specific reuse rules before redistribution.",
+    "domain": "cardiovascular_health",
+    "difficulty": "easy",
+    "document_path": "documents/medlineplus_cholesterol_001.md"
+  },
+  {
+    "doc_id": "fda_otc_pain_relievers_001",
+    "title": "Safe Use of Over-the-Counter Pain Relievers and Fever Reducers",
+    "publisher": "FDA",
+    "source_type": "drug_device_safety",
+    "source_url": "https://www.fda.gov/drugs/understanding-over-counter-medicines/safe-use-over-counter-pain-relievers-and-fever-reducers",
+    "accessed_at": "2026-06-24",
+    "license_notes": "FDA public website content is generally public domain unless otherwise noted; credit FDA and verify page-specific restrictions before redistribution.",
+    "domain": "medication_safety",
+    "difficulty": "medium",
+    "document_path": "documents/fda_otc_pain_relievers_001.md"
+  },
+  {
+    "doc_id": "medicaid_eligibility_001",
+    "title": "How Can I Find Out If I Am Eligible for Medicaid?",
+    "publisher": "Medicaid.gov",
+    "source_type": "insurance_program",
+    "source_url": "https://www.medicaid.gov/eligibility",
+    "accessed_at": "2026-06-24",
+    "license_notes": "Public Medicaid.gov page managed by CMS; verify reuse requirements and page-specific restrictions before redistribution.",
+    "domain": "medicaid",
+    "difficulty": "medium",
+    "document_path": "documents/medicaid_eligibility_001.md"
+  },
+  {
+    "doc_id": "medicare_part_d_001",
+    "title": "What Is Medicare Drug Coverage Part D?",
+    "publisher": "Medicare.gov",
+    "source_type": "insurance_program",
+    "source_url": "https://www.medicare.gov/health-drug-plans/part-d",
+    "accessed_at": "2026-06-24",
+    "license_notes": "Public Medicare.gov page managed by CMS; verify reuse requirements and page-specific restrictions before redistribution.",
+    "domain": "medicare",
+    "difficulty": "medium",
+    "document_path": "documents/medicare_part_d_001.md"
+  },
+  {
+    "doc_id": "hhs_hipaa_security_rule_001",
+    "title": "The HIPAA Security Rule",
+    "publisher": "HHS Office for Civil Rights",
+    "source_type": "federal_policy",
+    "source_url": "https://www.hhs.gov/hipaa/for-professionals/security/index.html",
+    "accessed_at": "2026-06-24",
+    "license_notes": "Public federal HHS/OCR page; verify reuse requirements and page-specific restrictions before redistribution.",
+    "domain": "privacy_safety",
+    "difficulty": "hard",
+    "document_path": "documents/hhs_hipaa_security_rule_001.md"
+  },
+  {
+    "doc_id": "clinicaltrials_remdesivir_pediatric_nct04431453_001",
+    "title": "ClinicalTrials.gov NCT04431453 Study of Remdesivir in Participants Below 18 Years Old With COVID-19",
+    "publisher": "ClinicalTrials.gov / NIH NLM",
+    "source_type": "clinical_trial",
+    "source_url": "https://clinicaltrials.gov/study/NCT04431453",
+    "accessed_at": "2026-06-24",
+    "license_notes": "Public ClinicalTrials.gov study record. This repo stores a concise attribution summary; verify ClinicalTrials.gov terms and record-specific reuse requirements before redistribution.",
+    "domain": "clinical_trials",
+    "difficulty": "hard",
+    "document_path": "documents/clinicaltrials_remdesivir_pediatric_nct04431453_001.md"
   }
 ]
-

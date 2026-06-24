@@ -17,7 +17,7 @@ Recommended subsets:
 - `qa_refusal.example.jsonl`: unsupported or out-of-scope examples that should
   trigger refusal behavior.
 
-Current real QA count: 92 examples across 60 main evaluation, 15 hard, and 17
+Current real QA count: 230 examples across 150 main evaluation, 40 hard, and 40
 refusal records. The `.example.jsonl` files remain schema examples and are not
 counted as real benchmark-development QA.
 

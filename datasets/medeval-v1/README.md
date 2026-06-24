@@ -5,11 +5,13 @@ dataset scaffold plus a small seed set of real public healthcare source
 documents. It is not a completed benchmark, validated clinical dataset, or
 source of benchmark results.
 
-Current Batch 7 status:
+Current Batch 11 status:
 
-- Real public source documents: 14
-- Real evidence-linked QA examples: 92
-- QA split counts: 60 main evaluation, 15 hard, 17 refusal
+- Real public source documents: 25
+- Real evidence-linked QA examples: 230
+- QA split counts: 150 main evaluation, 40 hard, 40 refusal
+- Answerable examples: 190
+- Refusal/unsupported examples: 40
 - Example QA fixtures: 3 small schema examples kept separate from real stats
 - Deterministic local baseline config: available
 - Multi-config deterministic comparison configs: available
@@ -38,6 +40,7 @@ The current seed set includes public sources from:
 - FDA
 - CMS
 - Medicare.gov
+- Medicaid.gov
 - HHS Office for Civil Rights
 - ClinicalTrials.gov / NIH NLM
 
@@ -60,16 +63,30 @@ been clinically reviewed.
 
 The current real QA files are:
 
-- `qa/qa_eval.jsonl`: 60 main evaluation examples
-- `qa/qa_hard.jsonl`: 15 harder examples, including multi-hop, comparison,
+- `qa/qa_eval.jsonl`: 150 main evaluation examples
+- `qa/qa_hard.jsonl`: 40 harder examples, including multi-hop, comparison,
   ambiguous, temporal, and contradiction-sensitive prompts
-- `qa/qa_refusal.jsonl`: 17 unsupported, out-of-scope, or patient-specific
+- `qa/qa_refusal.jsonl`: 40 unsupported, out-of-scope, or patient-specific
   refusal examples
 
 Categories represented include eligibility, deadlines, step-by-step process,
-benefits and services, restrictions and exclusions, location/contact,
+required documents, benefits and services, restrictions and exclusions, location/contact,
 privacy/safety, clinical caution, multi-hop, ambiguous, unsupported,
 out-of-scope, contradiction-sensitive, and temporal/versioned examples.
+
+Current real QA distribution:
+
+- Categories: ambiguous 13, benefits/services 34, clinical caution 40,
+  contradiction-sensitive 4, deadlines 7, eligibility 17, location/contact 6,
+  multi-hop 19, out-of-scope 12, privacy/safety 21, required documents 4,
+  restrictions/exclusions 22, step-by-step process 11, temporal/versioned 12,
+  unsupported 8
+- Difficulty: easy 52, medium 105, hard 73
+- Answer types: extractive 100, list 33, comparison 19, multi-hop 20,
+  abstractive 13, temporal 5, refusal 40
+- Source types: public health guidance 9, patient education 4,
+  drug/device safety 3, insurance program 4, federal policy 3,
+  clinical trial 2
 
 Each answerable QA example includes `gold_doc_ids` and `gold_evidence_spans`
 with exact `start_char` and `end_char` offsets into the source Markdown
@@ -144,7 +161,7 @@ The repository includes current deterministic local report artifacts under
 - `medeval_v1_comparison_results.csv`
 
 These artifacts were generated from local Postgres-backed deterministic runs
-over the 14-document, 92-QA public healthcare seed dataset. They include
+over the current public healthcare seed dataset. They include
 heuristic rich failure diagnostics: category counts, stage counts, severity
 counts, safety-relevant failure counts, legacy failure counts, and
 representative failure examples with diagnostic notes.

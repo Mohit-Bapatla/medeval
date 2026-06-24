@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 from sqlalchemy import create_engine, func, select
@@ -137,17 +138,17 @@ def test_cli_seed_dataset_imports_medeval_v1_real_splits(monkeypatch) -> None:
     )
 
     assert first.exit_code == 0, first.output
-    assert "Documents seeded: 14" in first.output
-    assert "QA examples seeded: 92" in first.output
+    assert "Documents seeded: 25" in first.output
+    assert "QA examples seeded: 230" in first.output
     assert "qa_eval.jsonl, qa_hard.jsonl, qa_refusal.jsonl" in first.output
     assert second.exit_code == 0, second.output
-    assert "Documents seeded: 0; skipped existing: 14" in second.output
-    assert "QA examples seeded: 0; skipped existing: 92" in second.output
+    assert "Documents seeded: 0; skipped existing: 25" in second.output
+    assert "QA examples seeded: 0; skipped existing: 230" in second.output
 
     with testing_session_local() as db:
-        assert db.scalar(select(func.count()).select_from(Document)) == 14
-        assert db.scalar(select(func.count()).select_from(QAExample)) == 92
-        assert db.scalar(select(func.count()).select_from(EvidenceLink)) > 75
+        assert db.scalar(select(func.count()).select_from(Document)) == 25
+        assert db.scalar(select(func.count()).select_from(QAExample)) == 230
+        assert db.scalar(select(func.count()).select_from(EvidenceLink)) > 190
         imported_ids = {
             row[0]
             for row in db.execute(select(QAExample.metadata_json["qa_id"].as_string())).all()
@@ -168,6 +169,58 @@ def test_cli_seed_dataset_imports_medeval_v1_real_splits(monkeypatch) -> None:
         assert example.gold_answer
         assert example.metadata_json["answer_type"] == "extractive"
         assert example.metadata_json["gold_evidence_spans"]
+
+
+def test_cli_seed_dataset_appends_new_medeval_v1_qa(monkeypatch, tmp_path) -> None:
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(bind=engine)
+    testing_session_local = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+    )
+    monkeypatch.setattr(cli_module, "SessionLocal", testing_session_local)
+
+    partial_path = tmp_path / "medeval-v1-partial"
+    shutil.copytree(MEDEVAL_V1_PATH, partial_path)
+    for qa_path in (partial_path / "qa").glob("qa_*.jsonl"):
+        if ".example." in qa_path.name:
+            continue
+        first_line = qa_path.read_text(encoding="utf-8").splitlines()[0]
+        qa_path.write_text(f"{first_line}\n", encoding="utf-8")
+
+    runner = CliRunner()
+    first = runner.invoke(
+        cli_module.app,
+        [
+            "seed-dataset",
+            "--path",
+            str(partial_path),
+            "--dataset-name",
+            "MedEval v1 Public Healthcare Seed",
+        ],
+    )
+    second = runner.invoke(
+        cli_module.app,
+        [
+            "seed-dataset",
+            "--path",
+            str(MEDEVAL_V1_PATH),
+            "--dataset-name",
+            "MedEval v1 Public Healthcare Seed",
+        ],
+    )
+
+    assert first.exit_code == 0, first.output
+    assert "QA examples seeded: 3" in first.output
+    assert second.exit_code == 0, second.output
+    assert "QA examples seeded: 227; skipped existing: 3" in second.output
+    with testing_session_local() as db:
+        assert db.scalar(select(func.count()).select_from(QAExample)) == 230
 
         refusal = (
             db.execute(

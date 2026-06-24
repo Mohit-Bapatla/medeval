@@ -1,6 +1,6 @@
 # MedEval v1 Deterministic Comparison Report
 
-Generated: 2026-06-24T01:55:32.440768+00:00
+Generated: 2026-06-24T05:48:01.492107+00:00
 
 ## Disclaimer
 
@@ -12,180 +12,194 @@ This comparison is a deterministic local debugging/regression workflow for an in
 
 | Experiment | ID | Status | Model | top_k | Examples |
 | --- | --- | --- | --- | ---: | ---: |
-| MedEval v1 Public Healthcare Seed - Deterministic Baseline | cb5c7d8d | completed | deterministic-extractive-answer-v1 | 5 | 92 |
-| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | a0145407 | completed | deterministic-extractive-answer-v1-clean-context | 5 | 92 |
-| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 356916bc | completed | deterministic-extractive-answer-v1-refusal-oracle | 5 | 92 |
-| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | af1415ef | completed | deterministic-extractive-answer-v1-clean-refusal-oracle | 5 | 92 |
+| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 11eede9a | completed | deterministic-extractive-answer-v1 | 5 | 230 |
+| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 47162b10 | completed | deterministic-extractive-answer-v1-clean-context | 5 | 230 |
+| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | cfd9bd4a | completed | deterministic-extractive-answer-v1-refusal-oracle | 5 | 230 |
+| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 59d4ee82 | completed | deterministic-extractive-answer-v1-clean-refusal-oracle | 5 | 230 |
 
 ## Aggregate Metrics
 
 | Experiment | Correctness | Groundedness | Citation Precision | Citation Recall | Retrieval Precision | Retrieval Recall | Refusal Accuracy | Hallucination Rate | Avg Latency | Cost |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 0.292 | 0.989 | 0.800 | 0.907 | 0.180 | 0.976 | 0.870 | 0.130 | 0.000 | 0.000 |
-| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 0.337 | 0.989 | 0.810 | 0.900 | 0.180 | 0.976 | 0.880 | 0.120 | 0.000 | 0.000 |
-| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 0.412 | 0.804 | 0.919 | 0.907 | 0.180 | 0.976 | 0.989 | 0.196 | 0.011 | 0.000 |
-| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 0.446 | 0.804 | 0.919 | 0.900 | 0.180 | 0.976 | 0.989 | 0.196 | 0.011 | 0.000 |
+| MedEval v1 Public Healthcare Seed - Deterministic Baseline | 0.295 | 0.996 | 0.743 | 0.847 | 0.186 | 0.944 | 0.861 | 0.139 | 0.000 | 0.000 |
+| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | 0.335 | 0.991 | 0.739 | 0.843 | 0.186 | 0.944 | 0.861 | 0.139 | 0.000 | 0.000 |
+| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | 0.430 | 0.822 | 0.865 | 0.847 | 0.186 | 0.944 | 0.996 | 0.178 | 0.009 | 0.000 |
+| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | 0.465 | 0.817 | 0.856 | 0.843 | 0.186 | 0.944 | 0.991 | 0.183 | 0.004 | 0.000 |
 
 ## Deltas Vs Baseline
 
 | Experiment | Correctness Δ | Groundedness Δ | Citation Recall Δ | Retrieval Recall Δ | Refusal Accuracy Δ | Hallucination Rate Δ |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | MedEval v1 Public Healthcare Seed - Deterministic Baseline | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 |
-| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | +0.044 | +0.000 | -0.007 | +0.000 | +0.011 | -0.011 |
-| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | +0.120 | -0.185 | +0.000 | +0.000 | +0.120 | +0.065 |
-| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | +0.153 | -0.185 | -0.007 | +0.000 | +0.120 | +0.065 |
+| MedEval v1 Public Healthcare Seed - Clean Context Deterministic | +0.039 | -0.004 | -0.004 | +0.000 | +0.000 | +0.000 |
+| MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control | +0.135 | -0.174 | +0.000 | +0.000 | +0.135 | +0.039 |
+| MedEval v1 Public Healthcare Seed - Clean Context Refusal Control | +0.170 | -0.178 | -0.004 | +0.000 | +0.130 | +0.043 |
 
 ## Failure Type Counts
 
 ### MedEval v1 Public Healthcare Seed - Deterministic Baseline
 
-- bad_citation: 8
-- evaluator_insufficient_data: 6
-- failed_to_refuse: 11
-- missing_citation: 2
-- none: 3
+- bad_citation: 27
+- evaluator_insufficient_data: 9
+- failed_to_refuse: 31
+- missing_citation: 10
+- none: 14
 - over_refusal: 1
-- partial_answer: 16
-- wrong_answer: 45
+- partial_answer: 40
+- retrieval_miss: 2
+- wrong_answer: 96
 
 ### MedEval v1 Public Healthcare Seed - Clean Context Deterministic
 
-- bad_citation: 8
-- evaluator_insufficient_data: 7
-- failed_to_refuse: 10
-- missing_citation: 2
-- none: 4
-- over_refusal: 1
-- partial_answer: 18
-- wrong_answer: 42
+- bad_citation: 30
+- evaluator_insufficient_data: 10
+- failed_to_refuse: 30
+- missing_citation: 10
+- none: 16
+- over_refusal: 2
+- partial_answer: 48
+- retrieval_miss: 2
+- wrong_answer: 82
 
 ### MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control
 
-- bad_citation: 8
-- failed_to_refuse: 17
-- missing_citation: 2
-- none: 3
+- bad_citation: 27
+- failed_to_refuse: 40
+- missing_citation: 10
+- none: 14
 - over_refusal: 1
-- partial_answer: 16
-- wrong_answer: 45
+- partial_answer: 40
+- retrieval_miss: 2
+- wrong_answer: 96
 
 ### MedEval v1 Public Healthcare Seed - Clean Context Refusal Control
 
-- bad_citation: 8
-- failed_to_refuse: 17
-- missing_citation: 2
-- none: 4
-- over_refusal: 1
-- partial_answer: 18
-- wrong_answer: 42
+- bad_citation: 30
+- failed_to_refuse: 40
+- missing_citation: 10
+- none: 16
+- over_refusal: 2
+- partial_answer: 48
+- retrieval_miss: 2
+- wrong_answer: 82
 
 ## Rich Failure Diagnostics
 
 ### MedEval v1 Public Healthcare Seed - Deterministic Baseline
 
 Failure categories:
-- bad_synthesis: 45
-- citation_mismatch: 21
-- context_overload: 68
-- failed_refusal: 11
-- format_failure: 6
-- incomplete_answer: 16
-- missing_citation: 3
+- bad_synthesis: 96
+- citation_mismatch: 70
+- context_overload: 157
+- failed_refusal: 31
+- format_failure: 9
+- incomplete_answer: 40
+- missing_citation: 13
+- over_answering: 1
 - over_refusal: 1
-- retrieval_rank_failure: 6
-- temporal_failure: 3
+- retrieval_miss: 3
+- retrieval_rank_failure: 20
+- temporal_failure: 12
 
 Failure stages:
-- citation: 10
-- format: 6
-- generation: 16
-- refusal: 12
-- synthesis: 45
+- citation: 37
+- format: 9
+- generation: 40
+- refusal: 32
+- retrieval: 2
+- synthesis: 96
 
 Severity:
-- critical: 11
-- high: 45
-- low: 6
-- medium: 27
-- Safety-relevant failures: 56
+- critical: 31
+- high: 99
+- low: 9
+- medium: 77
+- Safety-relevant failures: 127
 
 ### MedEval v1 Public Healthcare Seed - Clean Context Deterministic
 
 Failure categories:
-- bad_synthesis: 42
-- citation_mismatch: 20
-- context_overload: 67
-- failed_refusal: 10
-- format_failure: 7
-- incomplete_answer: 18
-- missing_citation: 3
-- over_refusal: 1
-- retrieval_rank_failure: 6
-- temporal_failure: 3
+- bad_synthesis: 82
+- citation_mismatch: 72
+- context_overload: 153
+- failed_refusal: 30
+- format_failure: 10
+- incomplete_answer: 48
+- missing_citation: 14
+- over_answering: 1
+- over_refusal: 2
+- retrieval_miss: 3
+- retrieval_rank_failure: 20
+- temporal_failure: 12
 
 Failure stages:
-- citation: 10
-- format: 7
-- generation: 18
-- refusal: 11
-- synthesis: 42
+- citation: 40
+- format: 10
+- generation: 48
+- refusal: 32
+- retrieval: 2
+- synthesis: 82
 
 Severity:
-- critical: 10
-- high: 42
-- low: 7
-- medium: 29
-- Safety-relevant failures: 52
+- critical: 30
+- high: 85
+- low: 10
+- medium: 89
+- Safety-relevant failures: 112
 
 ### MedEval v1 Public Healthcare Seed - Metadata-Assisted Refusal Control
 
 Failure categories:
-- bad_synthesis: 45
-- citation_mismatch: 10
-- context_overload: 68
-- failed_refusal: 17
-- incomplete_answer: 16
-- missing_citation: 20
+- bad_synthesis: 96
+- citation_mismatch: 39
+- context_overload: 157
+- failed_refusal: 40
+- incomplete_answer: 40
+- missing_citation: 53
 - over_refusal: 1
-- retrieval_rank_failure: 6
-- temporal_failure: 2
+- retrieval_miss: 3
+- retrieval_rank_failure: 20
+- temporal_failure: 10
 
 Failure stages:
-- citation: 10
-- generation: 16
-- refusal: 18
-- synthesis: 45
+- citation: 37
+- generation: 40
+- refusal: 41
+- retrieval: 2
+- synthesis: 96
 
 Severity:
-- critical: 17
-- high: 45
-- medium: 27
-- Safety-relevant failures: 62
+- critical: 40
+- high: 99
+- medium: 77
+- Safety-relevant failures: 136
 
 ### MedEval v1 Public Healthcare Seed - Clean Context Refusal Control
 
 Failure categories:
-- bad_synthesis: 42
-- citation_mismatch: 10
-- context_overload: 67
-- failed_refusal: 17
-- incomplete_answer: 18
-- missing_citation: 20
-- over_refusal: 1
-- retrieval_rank_failure: 6
-- temporal_failure: 2
+- bad_synthesis: 82
+- citation_mismatch: 42
+- context_overload: 153
+- failed_refusal: 40
+- incomplete_answer: 48
+- missing_citation: 54
+- over_refusal: 2
+- retrieval_miss: 3
+- retrieval_rank_failure: 20
+- temporal_failure: 10
 
 Failure stages:
-- citation: 10
-- generation: 18
-- refusal: 18
-- synthesis: 42
+- citation: 40
+- generation: 48
+- refusal: 42
+- retrieval: 2
+- synthesis: 82
 
 Severity:
-- critical: 17
-- high: 42
-- medium: 29
-- Safety-relevant failures: 59
+- critical: 40
+- high: 85
+- medium: 89
+- Safety-relevant failures: 122
 
 ## Notes And Limitations
 

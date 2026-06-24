@@ -51,33 +51,28 @@ class MedEvalV1SeedService:
             db, root
         )
         dataset = self._get_or_create_dataset(db, root, dataset_name)
-        existing_example = (
+        existing_examples = (
             db.execute(select(QAExample).where(QAExample.dataset_id == dataset.id))
             .scalars()
-            .first()
+            .all()
         )
-        if existing_example is not None:
-            stats = dataset_statistics(root)
-            return SeedDatasetResult(
-                dataset_id=str(dataset.id),
-                dataset_name=dataset.name,
-                documents_seeded=documents_seeded,
-                documents_skipped=documents_skipped,
-                chunks_created=chunks_created,
-                qa_examples_seeded=0,
-                qa_examples_skipped=stats["qa_count"],
-                evidence_links_created=0,
-                evidence_links_skipped=0,
-                splits_included=list(stats["qa_count_by_split"].keys()),
-            )
+        existing_qa_ids = {
+            example.metadata_json.get("qa_id")
+            for example in existing_examples
+            if example.metadata_json.get("qa_id")
+        }
 
         qa_seeded = 0
+        qa_skipped = 0
         evidence_links_created = 0
         evidence_links_skipped = 0
         splits_included: list[str] = []
         for split_path, examples in validation.qa_examples_by_split.items():
             splits_included.append(split_path)
             for example in examples:
+                if example.qa_id in existing_qa_ids:
+                    qa_skipped += 1
+                    continue
                 created = dataset_service.create_qa_example(
                     db,
                     dataset.id,
@@ -107,6 +102,7 @@ class MedEvalV1SeedService:
                         ),
                     )
                     evidence_links_created += 1
+                existing_qa_ids.add(example.qa_id)
 
         return SeedDatasetResult(
             dataset_id=str(dataset.id),
@@ -115,7 +111,7 @@ class MedEvalV1SeedService:
             documents_skipped=documents_skipped,
             chunks_created=chunks_created,
             qa_examples_seeded=qa_seeded,
-            qa_examples_skipped=0,
+            qa_examples_skipped=qa_skipped,
             evidence_links_created=evidence_links_created,
             evidence_links_skipped=evidence_links_skipped,
             splits_included=splits_included,
@@ -176,10 +172,21 @@ class MedEvalV1SeedService:
     def _get_or_create_dataset(
         self, db: Session, dataset_path: Path, dataset_name: str
     ) -> Dataset:
+        stats = dataset_statistics(dataset_path)
         existing = db.execute(select(Dataset).where(Dataset.name == dataset_name)).scalars().first()
         if existing:
+            metadata = dict(existing.metadata_json or {})
+            metadata.update(self._dataset_metadata(dataset_path, stats))
+            existing.metadata_json = metadata
+            existing.description = (
+                "In-development MedEval v1 public healthcare seed dataset with "
+                "evidence-linked QA; not clinically validated."
+            )
+            existing.version = "0.1.0-dev"
+            db.add(existing)
+            db.commit()
+            db.refresh(existing)
             return existing
-        stats = dataset_statistics(dataset_path)
         return dataset_service.create_dataset(
             db,
             DatasetCreate(
@@ -190,19 +197,23 @@ class MedEvalV1SeedService:
                 ),
                 version="0.1.0-dev",
                 source="imported_jsonl",
-                metadata={
-                    "dataset_path": str(dataset_path),
-                    "document_count": stats["document_count"],
-                    "qa_count": stats["qa_count"],
-                    "qa_count_by_split": stats["qa_count_by_split"],
-                    "refusal_count": stats["refusal_count"],
-                    "answerable_count": stats["answerable_count"],
-                    "not_clinically_validated": True,
-                    "not_medical_advice": True,
-                    "benchmark_complete": False,
-                },
+                metadata=self._dataset_metadata(dataset_path, stats),
             ),
         )
+
+    @staticmethod
+    def _dataset_metadata(dataset_path: Path, stats: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "dataset_path": str(dataset_path),
+            "document_count": stats["document_count"],
+            "qa_count": stats["qa_count"],
+            "qa_count_by_split": stats["qa_count_by_split"],
+            "refusal_count": stats["refusal_count"],
+            "answerable_count": stats["answerable_count"],
+            "not_clinically_validated": True,
+            "not_medical_advice": True,
+            "benchmark_complete": False,
+        }
 
     def _chunk_and_embed_document(self, db: Session, document: Document, provider) -> int:
         chunks = []
